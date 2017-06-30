@@ -4,6 +4,8 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 
 import java.awt.*;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 
 import static java.lang.System.out;
 
@@ -35,6 +37,7 @@ public class UIPrivateChat extends UIChat {
             messageList.add(m, c, 0); //Add each message to the top of the list
         }
 
+        scrollToBottom();
     }
 
     @Override
@@ -46,5 +49,6 @@ public class UIPrivateChat extends UIChat {
     public void receiveMessage(Message message) {
         messageList.add(new UIMessage(message), c, messageList.getComponentCount()); //Add the received message at the bottom of the message list
         refresh();
+        scrollToBottom();
     }
 }

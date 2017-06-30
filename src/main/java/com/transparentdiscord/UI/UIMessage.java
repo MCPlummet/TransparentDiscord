@@ -1,5 +1,6 @@
 package com.transparentdiscord.UI;
 
+import com.transparentdiscord.Main;
 import net.dv8tion.jda.core.entities.Message;
 
 import javax.swing.*;
@@ -31,7 +32,10 @@ public class UIMessage extends JPanel {
         this.message = message;
 
         setLayout(new BorderLayout());
-        author = new JLabel(message.getAuthor().getName() + ":");
+        author = new JLabel(Main.getImage(message.getAuthor(),20,20));
+        author.setText(message.getAuthor().getName());
+        author.setHorizontalTextPosition(JLabel.CENTER);
+        author.setVerticalTextPosition(JLabel.BOTTOM);
         author.setBorder(new EmptyBorder(10,10,10,10));             //Add a buffer around the author name
         messageText = new JLabel(message.getContent());
 //      messageText.setBorder(new MatteBorder(0,1,0,0,Color.GRAY));

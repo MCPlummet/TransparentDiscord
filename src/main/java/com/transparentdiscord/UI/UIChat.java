@@ -8,8 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import static java.lang.System.out;
-
 /**
  * Created by liam on 6/23/17.
  * Represents an abstract chat interface
@@ -20,6 +18,7 @@ public abstract class UIChat extends JPanel {
     protected JScrollBar        vertScrollBar;  //The scroll bar of the message list
     protected JTextField        messageField;   //The text field where the user will enter messages to send
     protected MessageChannel    channel;        //The message channel this UI is responsible for displaying
+    private AdjustmentListener  downScroll;     //Added to vertScrollBar to scroll the ScrollPane to the bottom
 
     public UIChat() {
         setLayout(new BorderLayout());
@@ -46,6 +45,17 @@ public abstract class UIChat extends JPanel {
         });
 
         add(messageField, BorderLayout.SOUTH); //Add messageField at the bottom of UIChat, below the message list
+
+        downScroll = new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
+                adjustable.setValue(adjustable.getMaximum());
+                vertScrollBar.removeAdjustmentListener(this);
+            }
+        };
+
+        vertScrollBar.setUnitIncrement(16);
     }
 
     /**
@@ -73,4 +83,11 @@ public abstract class UIChat extends JPanel {
      * @return the MessageChannel this UI is responsible for displaying to the user
      */
     public MessageChannel getChannel() { return this.channel; }
+
+    /**
+     * Scrolls the ScrollPane to the bottom
+     */
+    protected void scrollToBottom() {
+        vertScrollBar.addAdjustmentListener(downScroll);
+    }
 }

@@ -1,16 +1,26 @@
 package com.transparentdiscord;
 import com.transparentdiscord.UI.*;
+import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
+import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.List;
+
+import static java.lang.System.out;
+
 /**
  * Created by liam on 6/20/17.
  * Controls the initialization of GUI elements and the underlying Discord API
@@ -31,11 +41,14 @@ public class Main {
     public static JPanel bubblePane;                        //The JPanel that contains the chat bubbles
     private static GridBagConstraints gbc;                  //Constraints for adding bubbles to bubblePane
 
+    private static HashMap<String, ImageIcon> chatIcons;    //Maps the ID of a chat, guild, or user icon to the icon
+
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
         String  token   = scanner.nextLine();               //Read the user token (obtainable from the Discord web client). Used to log in.
         chatWindows     = new HashMap<>();
+        chatIcons       = new HashMap<>();
 
         try {
             JDA jda = new JDABuilder(AccountType.CLIENT)    //Initialize the API
@@ -55,6 +68,7 @@ public class Main {
             chatWindow.setSize(300,500);
 
             bubbleWindow = new JFrame();
+            bubbleWindow.setLocationRelativeTo(null);
             bubbleWindow.setUndecorated(true);
             bubbleWindow.setBackground(new Color(0,0,0,0));//Make the window transparent
             bubbleWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Kill the program if the bubble window is closed
@@ -66,7 +80,7 @@ public class Main {
             gbc = new GridBagConstraints();
             gbc.gridwidth = GridBagConstraints.REMAINDER;
             gbc.weightx = 1;
-            gbc.ipady = 45;
+//            gbc.ipady = 45;
             gbc.fill = GridBagConstraints.HORIZONTAL;
 
             bubblePane.add(new UIFloatingButton(bubbleWindow, channelWindow), gbc, 0); //Add the channel list button
@@ -110,7 +124,7 @@ public class Main {
             else {
                 pc = new UIPrivateChat((PrivateChannel) channel);       //Otherwise, create a new UIChat
                 chatWindows.put(channel.getId(), pc);                   //Put it in chatWindows
-                addBubble(pc.getChannel());                             //And add a bubble for it
+                addBubble(pc.getChannel(), getImage((PrivateChannel) channel));//And add a bubble for it
             }
 
             chatWindow.getContentPane().removeAll();    //Clear the chatWindow, removing any previously opened chats
@@ -127,8 +141,8 @@ public class Main {
      * Clicking the button will open the given channel inside a UIChat inside chatWindow
      * @param channel the channel to add a bubble for
      */
-    public static void addBubble(MessageChannel channel) {
-        bubblePane.add(new UIFloatingButton(channel), gbc, 0);
+    public static void addBubble(MessageChannel channel, ImageIcon imageIcon) {
+        bubblePane.add(new UIFloatingButton(channel, imageIcon), gbc, 0);
         bubblePane.revalidate();
         bubblePane.repaint();
         resizeBubbles();
@@ -144,5 +158,75 @@ public class Main {
         bubbleWindow.setSize(50,bubblePane.getComponentCount()*65);                 //Increase the size of the bubble container
         bubbleWindow.revalidate();
         bubbleWindow.repaint();
+    }
+
+    public static ImageIcon getImage(Guild guild) {
+        if (chatIcons.containsKey(guild.getIconId()))
+            return chatIcons.get(guild.getIconId());
+        else {
+            try {
+                ImageIcon image = getImageFromURL(new URL(guild.getIconUrl()));
+                chatIcons.put(guild.getIconId(), image);
+                return image;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static ImageIcon getImage(Group group) {
+        if (chatIcons.containsKey(group.getIconId()))
+            return chatIcons.get(group.getIconId());
+        else {
+            try {
+                ImageIcon image = getImageFromURL(new URL(group.getIconUrl()));
+                chatIcons.put(group.getIconId(), image);
+                return image;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static ImageIcon getImage(PrivateChannel privateChannel) {
+        return getImage(privateChannel.getUser());
+    }
+
+    public static ImageIcon getImage(User user) {
+        if (chatIcons.containsKey(user.getAvatarId()))
+            return chatIcons.get(user.getAvatarId());
+        else {
+            try {
+                ImageIcon image = getImageFromURL(new URL(user.getAvatarUrl()));
+                chatIcons.put(user.getAvatarId(), image);
+                return image;
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public static ImageIcon getImage(User user, int width, int height) {
+        Image image = getImage(user).getImage();
+        image = image.getScaledInstance(width,height,Image.SCALE_SMOOTH);
+        return new ImageIcon(image);
+    }
+
+    private static ImageIcon getImageFromURL(URL url) throws IOException {
+        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty(
+                "User-Agent",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+        final BufferedImage image = ImageIO.read(connection.getInputStream());
+        return new ImageIcon(image);
     }
 }

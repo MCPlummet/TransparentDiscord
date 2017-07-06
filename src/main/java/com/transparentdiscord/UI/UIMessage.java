@@ -7,6 +7,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +25,7 @@ public class UIMessage extends JPanel {
     //TODO make message text wrap
     private JLabel messageText; //A JLabel containing the message text
     private JLabel timestamp;   //A JLabel containing the time the message was sent
+    private JPanel attachments;//A JPanel containing any message attachments
     //TODO add support for images, call history, files, message reactions, profile images
     //TODO implement message coalescing to combine messages sent in succession by the same user
 
@@ -32,6 +37,31 @@ public class UIMessage extends JPanel {
         this.message = message;
 
         setLayout(new BorderLayout());
+
+        attachments = new JPanel(); //May need to sort out layout
+        for (Message.Attachment a : message.getAttachments()) {
+            if (a.isImage()) {
+                try {
+                    Image image = Main.getImageFromURL(new URL(a.getUrl())).getImage();
+                    //TODO resize image to fit
+                    JLabel label = new JLabel(new ImageIcon(image));
+                    attachments.add(label);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                JLabel label = new JLabel(a.getFileName());
+                label.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        //TODO add file download prompt
+                    }
+                });
+                attachments.add(label);
+            }
+        }
+
         author = new JLabel(Main.getImage(message.getAuthor(),20,20));
         author.setText(message.getAuthor().getName());
         author.setHorizontalTextPosition(JLabel.CENTER);
@@ -44,6 +74,7 @@ public class UIMessage extends JPanel {
 
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));             //Add a line at the bottom of the message
 
+        add(attachments, BorderLayout.NORTH);
         add(author, BorderLayout.WEST);
         add(messageText, BorderLayout.CENTER);
         add(timestamp, BorderLayout.EAST);

@@ -221,7 +221,7 @@ public class Main {
         return new ImageIcon(image);
     }
 
-    private static ImageIcon getImageFromURL(URL url) throws IOException {
+    public static ImageIcon getImageFromURL(URL url) throws IOException {
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty(
                 "User-Agent",

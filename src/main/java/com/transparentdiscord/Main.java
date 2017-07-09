@@ -21,8 +21,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.List;
 
-import static java.lang.System.out;
-
 /**
  * Created by liam on 6/20/17.
  * Controls the initialization of GUI elements and the underlying Discord API
@@ -216,7 +214,7 @@ public class Main {
             return chatIcons.get(user.getAvatarId());
         else {
             try {
-                ImageIcon image = getImageFromURL(new URL(user.getAvatarUrl()));
+                ImageIcon image = getCircularImageFromURL(new URL(user.getAvatarUrl()));
                 chatIcons.put(user.getAvatarId(), image);
                 return image;
             } catch (MalformedURLException e) {
@@ -243,10 +241,61 @@ public class Main {
         return new ImageIcon(image);
     }
 
+    public static ImageIcon getCircularImageFromURL(URL url) throws IOException {
+        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty(
+                "User-Agent",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
+        final BufferedImage image = ImageIO.read(connection.getInputStream());
+        return new ImageIcon(clipToCircle(image));
+    }
+
     public static ImageIcon resizeToWidth(ImageIcon image, int width) {
         float ratio = (float) image.getIconHeight()/image.getIconWidth();
         int height = (int) (ratio * width);
         return new ImageIcon(image.getImage().getScaledInstance(width,height,Image.SCALE_SMOOTH));
+    }
+
+    /**
+     * Clips a buffered image to a circle as per https://stackoverflow.com/a/31424601
+     * @param image the buffered image to clip
+     * @return a masked buffered image clipped to a circle
+     */
+    private static BufferedImage clipToCircle(BufferedImage image) {
+        int diameter = Math.min(image.getWidth(), image.getHeight());
+        BufferedImage mask = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = mask.createGraphics();
+        applyRenderingHints(g2d);
+        g2d.fillOval(0, 0, diameter - 1, diameter - 1);
+        g2d.dispose();
+
+        BufferedImage masked = new BufferedImage(diameter, diameter, BufferedImage.TYPE_INT_ARGB);
+        g2d = masked.createGraphics();
+        applyRenderingHints(g2d);
+        int x = (diameter - image.getWidth()) / 2;
+        int y = (diameter - image.getHeight()) / 2;
+        g2d.drawImage(image, x, y, null);
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.DST_IN));
+        g2d.drawImage(mask, 0, 0, null);
+        g2d.dispose();
+
+        return masked;
+    }
+
+    /**
+     * Applies rendering hints to a Graphics2D object as per https://stackoverflow.com/a/31424601
+     * @param g2d the Graphics2D object to modify
+     */
+    private static void applyRenderingHints(Graphics2D g2d) {
+        g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+        g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
     }
 
     public static int getChatWidth() {

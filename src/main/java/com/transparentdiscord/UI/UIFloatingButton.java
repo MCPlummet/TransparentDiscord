@@ -46,6 +46,7 @@ public class UIFloatingButton extends JPanel {
                     child.setVisible(true);
                 else
                     child.setVisible(false);
+                parent.setBackground(new Color(0,0,0,0));
             }
             @Override
             public void mousePressed(MouseEvent mouseEvent) { //when pressed, record the location of the mouse

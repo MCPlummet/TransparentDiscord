@@ -42,9 +42,9 @@ public class UIMessage extends JPanel {
         for (Message.Attachment a : message.getAttachments()) {
             if (a.isImage()) {
                 try {
-                    Image image = Main.getImageFromURL(new URL(a.getUrl())).getImage();
-                    //TODO resize image to fit
-                    JLabel label = new JLabel(new ImageIcon(image));
+                    //Get the image from the URL and resize it to the width of the chat window
+                    ImageIcon image = Main.resizeToWidth(Main.getImageFromURL(new URL(a.getUrl())), Main.getChatWidth());
+                    JLabel label = new JLabel(image);
                     attachments.add(label);
                 } catch (IOException e) {
                     e.printStackTrace();

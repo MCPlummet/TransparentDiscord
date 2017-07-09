@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import static java.lang.System.out;
+
 /**
  * Created by liam on 6/23/17.
  * Represents an abstract chat interface
@@ -19,9 +21,13 @@ public abstract class UIChat extends JPanel {
     protected JTextField        messageField;   //The text field where the user will enter messages to send
     protected MessageChannel    channel;        //The message channel this UI is responsible for displaying
     private AdjustmentListener  downScroll;     //Added to vertScrollBar to scroll the ScrollPane to the bottom
+    private int                 tmpScrollValue; //Stores the previous maximum value before update of the vertical scroll bar
+    private boolean             fixScroll;      //a boolean to keep track of the state of the scrollbar while loading older messages
 
     public UIChat() {
         setLayout(new BorderLayout());
+
+        fixScroll = false;
 
         messageList = new JPanel(new GridBagLayout());
 
@@ -56,6 +62,20 @@ public abstract class UIChat extends JPanel {
         };
 
         vertScrollBar.setUnitIncrement(16);
+        vertScrollBar.addAdjustmentListener(new AdjustmentListener() {
+            @Override
+            public void adjustmentValueChanged(AdjustmentEvent e) {
+                Adjustable adjustable = e.getAdjustable();
+                if (adjustable.getValue() == 0 && !fixScroll) {
+                    tmpScrollValue = adjustable.getMaximum();
+                    fixScroll = true;
+                    loadMessageHistory();
+                } else if (fixScroll) {
+                    adjustable.setValue(adjustable.getMaximum()-tmpScrollValue);
+                    fixScroll = false;
+                }
+            }
+        });
     }
 
     /**
@@ -69,6 +89,11 @@ public abstract class UIChat extends JPanel {
      * @param message the message to update the UI with
      */
     public abstract void receiveMessage(Message message);
+
+    /**
+     * Loads past messages and adds them to the list view
+     */
+    protected abstract void loadMessageHistory();
 
     protected void refresh() {
         messageList.repaint();

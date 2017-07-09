@@ -1,5 +1,6 @@
 package com.transparentdiscord.UI;
 
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 
 import javax.swing.*;
@@ -29,27 +30,30 @@ public class UIChannelList extends JPanel {
         add(scrollPane);
 
         c = new GridBagConstraints();
+        c.gridwidth = GridBagConstraints.REMAINDER;
+        c.weightx = 1;
+        c.fill = GridBagConstraints.HORIZONTAL;
 
         vertScrollBar = scrollPane.getVerticalScrollBar();
     }
 
     /**
-     * Constructs a channel list element with a list of PrivateChannels
-     * @param channels a list of PrivateChannels to build the channel list from
+     * Add a list of PrivateChats to the UI
+     * @param channels the channels to add
      */
-    public UIChannelList(List<PrivateChannel> channels) {
-        this();
-
-        c.gridwidth = GridBagConstraints.REMAINDER;
-        c.weightx = 1;
-        c.fill = GridBagConstraints.HORIZONTAL;
+    public void addPrivateChannels(List<PrivateChannel> channels) {
         for (UIChannelListItem item : UIChannelListItem.loadPrivateChannels(channels))
-            channelList.add(item, c, 0); //Add the channel at the top of the list
+            channelList.add(item,c,0);
     }
 
-    //TODO implement PrivateChannel add
-    //TODO implement Group add
-    //TODO implement TextChannel add
+    /**
+     * Add a list of Guilds to the UI
+     * @param guilds the guilds to add
+     */
+    public void addGuilds(List<Guild> guilds) {
+        for (UIChannelListItem item : UIChannelListItem.loadGuilds(guilds))
+            channelList.add(item,c,0);
+    }
 
     /**
      * Refresh the channel list to display newly added elements

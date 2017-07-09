@@ -11,6 +11,8 @@ import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -66,6 +68,14 @@ public class Main {
             chatWindow = new JFrame();
             chatWindow.setUndecorated(true);
             chatWindow.setSize(300,500);
+            chatWindow.addFocusListener(new FocusAdapter() {
+                @Override
+                public void focusLost(FocusEvent focusEvent) {
+                    super.focusLost(focusEvent);
+                    chatWindow.setVisible(false);
+                }
+            });
+
 
             bubbleWindow = new JFrame();
             bubbleWindow.setLocationRelativeTo(null);
@@ -88,7 +98,10 @@ public class Main {
             bubbleWindow.setSize(50,50);
             bubbleWindow.setVisible(true);
 
-            channelWindow.add(new UIChannelList(privateChannels));  //Add a channel list, currently only containing private channels, the the channel window
+            UIChannelList channelList = new UIChannelList();
+            channelList.addGuilds(guilds);
+            channelList.addPrivateChannels(privateChannels);
+            channelWindow.add(channelList);  //Add a channel list, currently only containing private channels, the the channel window
             //TODO add Groups and Guild Text Channels to the channel list (see UIChannelList)
 
         } catch (InterruptedException e) {
@@ -228,5 +241,15 @@ public class Main {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
         final BufferedImage image = ImageIO.read(connection.getInputStream());
         return new ImageIcon(image);
+    }
+
+    public static ImageIcon resizeToWidth(ImageIcon image, int width) {
+        float ratio = (float) image.getIconHeight()/image.getIconWidth();
+        int height = (int) (ratio * width);
+        return new ImageIcon(image.getImage().getScaledInstance(width,height,Image.SCALE_SMOOTH));
+    }
+
+    public static int getChatWidth() {
+        return chatWindow.getWidth();
     }
 }

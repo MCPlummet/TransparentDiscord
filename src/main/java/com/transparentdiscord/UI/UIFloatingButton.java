@@ -33,7 +33,7 @@ public class UIFloatingButton extends JPanel {
         buttonColor = Color.blue;           //This allows dragging, so is not a chat window, therefore blue, for now
 
 //        setLayout(new BorderLayout());
-        JLabel title = new JLabel("TD", JLabel.CENTER);
+        JLabel title = new JLabel(Main.getScaledImageFromFile(getClass().getResource("/images/Discordbubble256.png"),50,50));
         title.setForeground(Color.black);
 
         draw = true;

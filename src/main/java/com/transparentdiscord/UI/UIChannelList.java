@@ -35,6 +35,7 @@ public class UIChannelList extends JPanel {
         c.fill = GridBagConstraints.HORIZONTAL;
 
         vertScrollBar = scrollPane.getVerticalScrollBar();
+        vertScrollBar.setUnitIncrement(16);
     }
 
     /**

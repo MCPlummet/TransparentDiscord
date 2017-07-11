@@ -7,10 +7,14 @@ import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.requests.Route;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,17 +25,38 @@ import java.util.List;
 public class UIChannelListItem extends JPanel {
 
     private JLabel displayName;     //A JLabel containing the name of the channel/guild
+    private JLabel icon;
+
+    private UIChannelListItem() {
+        setLayout(new BorderLayout());
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent mouseEvent) {
+                setBackground(Color.decode("#99AAB5"));
+            }
+
+            @Override public void mouseExited(MouseEvent mouseEvent) {
+                setBackground(Color.WHITE);
+            }
+        });
+        setCursor(new Cursor(Cursor.HAND_CURSOR)); //Indicate to the user that this element is meant to be clicked
+    }
 
     /**
      * Constructs a list item around a MessageChannel
      * @param channel the channel to create the list item from
      */
-    public UIChannelListItem(MessageChannel channel) {
-        displayName = new JLabel(channel.getName());
+    public UIChannelListItem(PrivateChannel channel) {
+        this();
 
-        setLayout(new BorderLayout());
+        displayName = new JLabel(channel.getName());
+        displayName.setBorder(new EmptyBorder(10,10,10,10));
+
+        icon = new JLabel(Main.resizeToWidth(Main.getImage(channel),50));
 
         add(displayName, BorderLayout.CENTER);
+        add(icon, BorderLayout.WEST);
 
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
@@ -39,19 +64,21 @@ public class UIChannelListItem extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-            Main.openChat(channel);
+                Main.openChat(channel);
             }
         });
-
-        setCursor(new Cursor(Cursor.HAND_CURSOR)); //Indicate to the user that this element is meant to be clicked
     }
 
     public UIChannelListItem(Guild guild) {
-        displayName = new JLabel(guild.getName());
+        this();
 
-        setLayout(new BorderLayout());
+        displayName = new JLabel(guild.getName());
+        displayName.setBorder(new EmptyBorder(10,10,10,10));
+
+        icon = new JLabel(Main.resizeToWidth(Main.getImage(guild),50));
 
         add(displayName, BorderLayout.CENTER);
+        add(icon, BorderLayout.WEST);
 
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
@@ -62,8 +89,6 @@ public class UIChannelListItem extends JPanel {
                 //TODO open guild window???
             }
         });
-
-        setCursor(new Cursor(Cursor.HAND_CURSOR)); //Indicate to the user that this element is meant to be clicked
     }
 
     /**
@@ -73,8 +98,9 @@ public class UIChannelListItem extends JPanel {
      */
     public static List<UIChannelListItem> loadPrivateChannels(List<PrivateChannel> channels) {
         ArrayList<UIChannelListItem> list = new ArrayList<>();
-        for (MessageChannel c : channels)
+        for (PrivateChannel c : channels) {
             list.add(new UIChannelListItem(c));
+        }
         return list;
     }
 

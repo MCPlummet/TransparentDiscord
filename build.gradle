@@ -20,4 +20,10 @@ dependencies {
     compile "net.dv8tion:JDA:$jdaVersion"
 }
 
+shadowJar {
+    baseName = 'TransparentDiscord'
+    setDestinationDir(file('build/jar'))
+    classifier = null
+}
+
 compileJava.options.encoding = 'UTF-8'

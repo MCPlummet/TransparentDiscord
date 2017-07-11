@@ -1,5 +1,6 @@
 package com.transparentdiscord.UI;
 
+import com.transparentdiscord.Main;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.PrivateChannel;
@@ -39,6 +40,8 @@ public class UIPrivateChat extends UIChat {
         for (UIMessage m : UIMessage.loadMessages(messageHistory.retrievePast(20).complete())) {
             messageList.add(m, c, 0); //Add each message to the top of the list
         }
+
+        add(new UITitleBar(channel.getName(), Main.chatWindow), BorderLayout.NORTH);
 
         scrollToBottom();
     }

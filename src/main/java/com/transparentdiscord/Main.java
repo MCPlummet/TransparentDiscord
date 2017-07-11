@@ -21,6 +21,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.List;
 
+import static java.lang.System.out;
+
 /**
  * Created by liam on 6/20/17.
  * Controls the initialization of GUI elements and the underlying Discord API
@@ -42,6 +44,7 @@ public class Main {
     private static GridBagConstraints gbc;                  //Constraints for adding bubbles to bubblePane
 
     private static HashMap<String, ImageIcon> chatIcons;    //Maps the ID of a chat, guild, or user icon to the icon
+    private static ImageIcon defaultUserIcon;
 
     public static void main(String[] args) {
 
@@ -59,7 +62,11 @@ public class Main {
             privateChannels = jda.getPrivateChannels();     //Get a list of all the user's private chats (note: these are chats the user has already created, not one for every contact/friend)
             textChannels = jda.getTextChannels();           //Get a list of all the text chats from the user's guilds
 
+            defaultUserIcon = getCircularImageFromURL(new URL(jda.getSelfUser().getDefaultAvatarUrl()));
+
             channelWindow = new JFrame();
+            channelWindow.setLayout(new BorderLayout());
+            channelWindow.add(new UITitleBar(), BorderLayout.NORTH);
             channelWindow.setUndecorated(true);             //Remove the window border
             channelWindow.setSize(300,500);
 
@@ -76,9 +83,11 @@ public class Main {
 
 
             bubbleWindow = new JFrame();
+            bubbleWindow.setSize(50,50);
             bubbleWindow.setLocationRelativeTo(null);
             bubbleWindow.setUndecorated(true);
             bubbleWindow.setBackground(new Color(0,0,0,0));//Make the window transparent
+            bubbleWindow.setAlwaysOnTop(true);
             bubbleWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Kill the program if the bubble window is closed
 
             bubblePane = new JPanel();
@@ -99,7 +108,7 @@ public class Main {
             UIChannelList channelList = new UIChannelList();
             channelList.addGuilds(guilds);
             channelList.addPrivateChannels(privateChannels);
-            channelWindow.add(channelList);  //Add a channel list, currently only containing private channels, the the channel window
+            channelWindow.add(channelList, BorderLayout.CENTER);  //Add a channel list, currently only containing private channels, the the channel window
             //TODO add Groups and Guild Text Channels to the channel list (see UIChannelList)
 
         } catch (InterruptedException e) {
@@ -107,6 +116,10 @@ public class Main {
         } catch (RateLimitedException e) {
             e.printStackTrace();
         } catch (LoginException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -147,6 +160,10 @@ public class Main {
         }
     }
 
+    public static void openChat(Guild guild) {
+
+    }
+
     /**
      * Adds a bubble to the bubble list for a given channel
      * Clicking the button will open the given channel inside a UIChat inside chatWindow
@@ -154,8 +171,6 @@ public class Main {
      */
     public static void addBubble(MessageChannel channel, ImageIcon imageIcon) {
         bubblePane.add(new UIFloatingButton(channel, imageIcon), gbc, 0);
-        bubblePane.revalidate();
-        bubblePane.repaint();
         resizeBubbles();
         repositionWindows();
     }
@@ -176,16 +191,15 @@ public class Main {
             return chatIcons.get(guild.getIconId());
         else {
             try {
-                ImageIcon image = getImageFromURL(new URL(guild.getIconUrl()));
+                ImageIcon image = getCircularImageFromURL(new URL(guild.getIconUrl()));
                 chatIcons.put(guild.getIconId(), image);
                 return image;
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                return defaultUserIcon;
             } catch (IOException e) {
-                e.printStackTrace();
+                return defaultUserIcon;
             }
         }
-        return null;
     }
 
     public static ImageIcon getImage(Group group) {
@@ -218,12 +232,11 @@ public class Main {
                 chatIcons.put(user.getAvatarId(), image);
                 return image;
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                return defaultUserIcon;
             } catch (IOException e) {
-                e.printStackTrace();
+                return defaultUserIcon;
             }
         }
-        return null;
     }
 
     public static ImageIcon getImage(User user, int width, int height) {
@@ -248,6 +261,16 @@ public class Main {
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
         final BufferedImage image = ImageIO.read(connection.getInputStream());
         return new ImageIcon(clipToCircle(image));
+    }
+
+    public static ImageIcon getImageFromFile(URL path) {
+        return new ImageIcon(path);
+    }
+
+    public static ImageIcon getScaledImageFromFile(URL path, int width, int height) {
+        Image image = getImageFromFile(path).getImage();
+        image = image.getScaledInstance(width,height,Image.SCALE_SMOOTH);
+        return new ImageIcon(image);
     }
 
     public static ImageIcon resizeToWidth(ImageIcon image, int width) {
@@ -301,4 +324,6 @@ public class Main {
     public static int getChatWidth() {
         return chatWindow.getWidth();
     }
+
+    public static ImageIcon getDefaultUserIcon() { return defaultUserIcon; }
 }

@@ -4,6 +4,7 @@ import com.transparentdiscord.Main;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.PrivateChannel;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.requests.Route;
 
 import javax.swing.*;
@@ -17,6 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.System.out;
 
 /**
  * Created by liam on 6/26/17.
@@ -82,11 +85,36 @@ public class UIChannelListItem extends JPanel {
 
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
+        UIChannelList channelList = new UIChannelList();
+        channelList.addTextChannels(guild.getTextChannels());
+
+        JPopupMenu channelMenu = new JPopupMenu();
+        channelMenu.add(channelList);
+
+        //When clicked, open the chat
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                channelMenu.show(e.getComponent(),0,0);
+            }
+        });
+    }
+
+    public UIChannelListItem(TextChannel channel) {
+        this();
+
+        displayName = new JLabel(channel.getName());
+        displayName.setBorder(new EmptyBorder(10,10,10,10));
+
+        add(displayName, BorderLayout.CENTER);
+
+        setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
+
         //When clicked, open the chat
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                //TODO open guild window???
+                Main.openChat(channel);
             }
         });
     }
@@ -113,6 +141,14 @@ public class UIChannelListItem extends JPanel {
         ArrayList<UIChannelListItem> list = new ArrayList<>();
         for (Guild g : guilds)
             list.add(new UIChannelListItem(g));
+        return list;
+    }
+
+    public static List<UIChannelListItem> loadTextChannels(List<TextChannel> channels) {
+        ArrayList<UIChannelListItem> list = new ArrayList<>();
+        for (TextChannel c : channels) {
+            list.add(new UIChannelListItem(c));
+        }
         return list;
     }
 }

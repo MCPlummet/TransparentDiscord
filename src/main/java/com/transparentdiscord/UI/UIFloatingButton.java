@@ -2,6 +2,7 @@ package com.transparentdiscord.UI;
 
 import com.transparentdiscord.Main;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -94,7 +95,12 @@ public class UIFloatingButton extends JPanel {
         });
 
         setSize(50,50);
-        setToolTipText(channel.getName());  //Set the hover text to the name of the channel
+        if (channel instanceof TextChannel) {
+            TextChannel tc = (TextChannel) channel;
+            setToolTipText(tc.getGuild().getName() + " #" + channel.getName());
+        } else {
+            setToolTipText(channel.getName());  //Set the hover text to the name of the channel
+        }
         setCursor(new Cursor(Cursor.HAND_CURSOR));  //Indicate to the user that this element is clickable
     }
 

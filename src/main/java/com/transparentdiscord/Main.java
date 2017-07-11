@@ -21,8 +21,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.List;
 
-import static java.lang.System.out;
-
 /**
  * Created by liam on 6/20/17.
  * Controls the initialization of GUI elements and the underlying Discord API
@@ -56,7 +54,7 @@ public class Main {
         try {
             JDA jda = new JDABuilder(AccountType.CLIENT)    //Initialize the API
                     .setToken(token)                        //Log in with the token specified on stdin
-                    .addEventListener(new MessageListenerTest()) //Add a message listener to handle Discord events (messages, calls, etc.)
+                    .addEventListener(new MessageListener()) //Add a message listener to handle Discord events (messages, calls, etc.)
                     .buildBlocking();                       //Makes sure the API finishes initializing before continuing (as opposed to buildAsync()
             guilds = jda.getGuilds();                       //Get a list of all the guilds the user is a member of
             privateChannels = jda.getPrivateChannels();     //Get a list of all the user's private chats (note: these are chats the user has already created, not one for every contact/friend)
@@ -68,11 +66,11 @@ public class Main {
             channelWindow.setLayout(new BorderLayout());
             channelWindow.add(new UITitleBar(), BorderLayout.NORTH);
             channelWindow.setUndecorated(true);             //Remove the window border
-            channelWindow.setSize(300,500);
+            channelWindow.setSize(400,700);
 
             chatWindow = new JFrame();
             chatWindow.setUndecorated(true);
-            chatWindow.setSize(300,500);
+            chatWindow.setSize(400,700);
             chatWindow.addFocusListener(new FocusAdapter() {
                 @Override
                 public void focusLost(FocusEvent focusEvent) {
@@ -131,8 +129,8 @@ public class Main {
         int bubbleX = bubbleWindow.getX();
         int bubbleY = bubbleWindow.getY();
 
-        chatWindow.setLocation(bubbleX-305,bubbleY-(500-bubbleWindow.getHeight()));
-        channelWindow.setLocation(bubbleX-305,bubbleY-(500-bubbleWindow.getHeight()));
+        chatWindow.setLocation(bubbleX-405,bubbleY-(700-bubbleWindow.getHeight()));
+        channelWindow.setLocation(bubbleX-405,bubbleY-(700-bubbleWindow.getHeight()));
     }
 
     /**
@@ -150,18 +148,28 @@ public class Main {
                 chatWindows.put(channel.getId(), pc);                   //Put it in chatWindows
                 addBubble(pc.getChannel(), getImage((PrivateChannel) channel));//And add a bubble for it
             }
-
-            chatWindow.getContentPane().removeAll();    //Clear the chatWindow, removing any previously opened chats
-            chatWindow.add(pc);                         //Add the new UIChat
-            chatWindow.revalidate();
-            chatWindow.repaint();                       //Reload the chatWindow
+            chatWindow.setContentPane(pc);              //Update the current chat UI
             chatWindow.setVisible(true);                //Make sure chatWindow is displayed
+            chatWindow.revalidate();                    //Refresh the chat window
+            chatWindow.repaint();                       //..
+            channelWindow.setVisible(false);            //Hide the channel list
+        } else if (channel instanceof TextChannel) {
+            UITextChat tc;
+            TextChannel textChannel = (TextChannel) channel;
+            if (chatWindows.containsKey(channel.getId()))
+                tc = (UITextChat) chatWindows.get(channel.getId());
+            else {
+                tc = new UITextChat((TextChannel) channel);
+                chatWindows.put(channel.getId(), tc);
+                addBubble(tc.getChannel(), getImage(textChannel.getGuild()));
+            }
+
+            chatWindow.setContentPane(tc);              //Update the current chat UI
+            chatWindow.setVisible(true);                //Make sure chatWindow is displayed
+            chatWindow.revalidate();                    //Refresh the chat window
+            chatWindow.repaint();                       //..
             channelWindow.setVisible(false);            //Hide the channel list
         }
-    }
-
-    public static void openChat(Guild guild) {
-
     }
 
     /**

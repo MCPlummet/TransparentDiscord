@@ -6,10 +6,6 @@ import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 
 import java.awt.*;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-
-import static java.lang.System.out;
 
 /**
  * Created by liam on 6/23/17.
@@ -37,13 +33,16 @@ public class UIPrivateChat extends UIChat {
 
         //Get some message history and add it to the message list
         //Message history in order from newest to oldest
-        for (UIMessage m : UIMessage.loadMessages(messageHistory.retrievePast(20).complete())) {
-            messageList.add(m, c, 0); //Add each message to the top of the list
-        }
+        messageHistory.retrievePast(20).queue(messages -> {
+            for (UIMessage m : UIMessage.loadMessages(messages)) {
+                messageList.add(m, c, 0); //Add each message to the top of the list
+            }
+            refresh();
+            scrollToBottom();
+            doneLoad = true;
+        });
 
         add(new UITitleBar(channel.getName(), Main.chatWindow), BorderLayout.NORTH);
-
-        scrollToBottom();
     }
 
     @Override
@@ -60,9 +59,11 @@ public class UIPrivateChat extends UIChat {
 
     @Override
     protected void loadMessageHistory() {
-        for (UIMessage m : UIMessage.loadMessages(messageHistory.retrievePast(10).complete())) {
-            messageList.add(m, c, 0); //Add each message to the top of the list
-        }
-        refresh();
+        messageHistory.retrievePast(10).queue(messages -> {
+            for (UIMessage m : UIMessage.loadMessages(messages)) {
+                messageList.add(m, c, 0); //Add each message to the top of the list
+            }
+            refresh();
+        });
     }
 }

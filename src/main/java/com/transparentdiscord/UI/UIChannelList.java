@@ -1,5 +1,6 @@
 package com.transparentdiscord.UI;
 
+import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -60,6 +61,11 @@ public class UIChannelList extends JPanel {
     public void addTextChannels(List<TextChannel> channels) {
         for (UIChannelListItem item : UIChannelListItem.loadTextChannels(channels))
             channelList.add(item,c,channelList.getComponentCount());
+    }
+
+    public void addGroups(List<Group> groups) {
+        for (UIChannelListItem item : UIChannelListItem.loadGroups(groups))
+            channelList.add(item,c,0);
     }
 
     /**

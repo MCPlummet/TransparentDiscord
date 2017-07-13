@@ -1,10 +1,8 @@
 package com.transparentdiscord.UI;
 
 import com.transparentdiscord.Main;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.PrivateChannel;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.client.entities.Group;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.requests.Route;
 
 import javax.swing.*;
@@ -29,9 +27,12 @@ public class UIChannelListItem extends JPanel {
 
     private JLabel displayName;     //A JLabel containing the name of the channel/guild
     private JLabel icon;
+    private final int ICON_WIDTH = 40;
 
     private UIChannelListItem() {
         setLayout(new BorderLayout());
+
+        setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -56,12 +57,10 @@ public class UIChannelListItem extends JPanel {
         displayName = new JLabel(channel.getName());
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
-        icon = new JLabel(Main.resizeToWidth(Main.getImage(channel),50));
+        icon = new JLabel(Main.resizeToWidth(Main.getImage(channel),ICON_WIDTH));
 
         add(displayName, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
-
-        setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
         //When clicked, open the chat
         addMouseListener(new MouseAdapter() {
@@ -78,12 +77,10 @@ public class UIChannelListItem extends JPanel {
         displayName = new JLabel(guild.getName());
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
-        icon = new JLabel(Main.resizeToWidth(Main.getImage(guild),50));
+        icon = new JLabel(Main.resizeToWidth(Main.getImage(guild),ICON_WIDTH));
 
         add(displayName, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
-
-        setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
         UIChannelList channelList = new UIChannelList();
         channelList.addTextChannels(guild.getTextChannels());
@@ -108,13 +105,39 @@ public class UIChannelListItem extends JPanel {
 
         add(displayName, BorderLayout.CENTER);
 
-        setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
-
         //When clicked, open the chat
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 Main.openChat(channel);
+            }
+        });
+    }
+
+    public UIChannelListItem(Group group) {
+        this();
+
+        StringBuilder name = new StringBuilder();
+        if (group.getName() == null) {
+            for (User user : group.getUsers())
+                name.append(user.getName() + ", ");
+            name.deleteCharAt(name.length()-1);
+            name.deleteCharAt(name.length()-1);
+        } else {
+            name.append(group.getName());
+        }
+        displayName = new JLabel(name.toString());
+        displayName.setBorder(new EmptyBorder(10,10,10,10));
+
+        icon = new JLabel(Main.resizeToWidth(Main.getImage(group),ICON_WIDTH));
+
+        add(displayName, BorderLayout.CENTER);
+        add(icon, BorderLayout.WEST);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                Main.openChat(group);
             }
         });
     }
@@ -148,6 +171,14 @@ public class UIChannelListItem extends JPanel {
         ArrayList<UIChannelListItem> list = new ArrayList<>();
         for (TextChannel c : channels) {
             list.add(new UIChannelListItem(c));
+        }
+        return list;
+    }
+
+    public static List<UIChannelListItem> loadGroups(List<Group> groups) {
+        ArrayList<UIChannelListItem> list = new ArrayList<>();
+        for (Group g : groups) {
+            list.add(new UIChannelListItem(g));
         }
         return list;
     }

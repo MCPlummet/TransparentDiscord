@@ -28,14 +28,15 @@ then the UI will open.</p>
 <h3>Plans</h3>
 <p>TransparentDiscord is far from finished. Immidiate plans include:
 <bl>
-  <li>Adding image/file support</li>
-  <li>Adding profile/channel images</li>
+  <li>Adding file support</li>
   <li>Adding support for group chats</li>
-  <li>Adding support for Guilds/Servers</li>
   <li>Adding support for creating new channels</li>
   <li>Adding support for message reactions</li>
 </bl><br>
 Presently, the interface is using the default Swing appearance. Eventually that will need attention. A notification system
 needs to be devised, as well as support for setting and displaying statuses. At some point down the road, I'd also
 like to look into supporting voice calls.</p>
+
+<h3>Disclaimer</h3>
+<p>I am not in any way affiliated with the creators of Discord or the creators of JDA.</p>
   

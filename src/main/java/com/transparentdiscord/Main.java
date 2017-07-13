@@ -1,5 +1,6 @@
 package com.transparentdiscord;
 import com.transparentdiscord.UI.*;
+import net.dv8tion.jda.client.entities.Friend;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -11,15 +12,23 @@ import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+
+import static java.lang.System.out;
 
 /**
  * Created by liam on 6/20/17.
@@ -30,9 +39,11 @@ public class Main {
 
     public static List<Guild> guilds;                       //A list of what Discord calls "servers" (henceforth these will be referred to as guilds
     public static List<PrivateChannel> privateChannels;     //A list of Private/Direct Messages
-    public static List<TextChannel> textChannels;           //A list of text channels from Guilds/Servers
+    public static List<Group> groups;                       //A list of Group messages
+    public static List<Friend> friends;                      //A list of the user's friends
 
     public static HashMap<String, UIChat> chatWindows;      //Maps the ID of a MessageChannel (String) to the UI associated with that channel (UIChat)
+    private static HashMap<String, ImageIcon> chatIcons;    //Maps the ID of a chat, guild, or user icon to the icon
 
     public static JFrame channelWindow;                     //The JFrame responsible for displaying a UIChannelList
     public static JFrame chatWindow;                        //The JFrame responsible for displaying the active UIChat
@@ -41,85 +52,142 @@ public class Main {
     public static JPanel bubblePane;                        //The JPanel that contains the chat bubbles
     private static GridBagConstraints gbc;                  //Constraints for adding bubbles to bubblePane
 
-    private static HashMap<String, ImageIcon> chatIcons;    //Maps the ID of a chat, guild, or user icon to the icon
-    private static ImageIcon defaultUserIcon;
+    private static ImageIcon defaultUserIcon;               //The default user icon (Discord logo with yellow background)
+    private static JDA jda;                                 //The object used to interface with Discord
 
     public static void main(String[] args) {
+        File tokenFile = new File("token");
+        if (tokenFile.exists()) {
+            try {
+                String token = Files.readAllLines(Paths.get(tokenFile.getPath())).get(0);
+                init(token);
+            } catch (Exception e) {
+                displayLoginPrompt();
+                e.printStackTrace();
+            }
+        } else {
+            displayLoginPrompt();
+        }
+    }
 
-        Scanner scanner = new Scanner(System.in);
-        String  token   = scanner.nextLine();               //Read the user token (obtainable from the Discord web client). Used to log in.
+    private static void displayLoginPrompt() {
+        JFrame loginWindow = new JFrame("Login");
+        JPanel loginPanel = new JPanel();
+        loginPanel.setLayout(new BorderLayout());
+        loginWindow.add(loginPanel);
+        JTextField tokenField = new JTextField();
+        JButton submit = new JButton("Log in");
+        JCheckBox saveToken = new JCheckBox("Remember");
+        loginPanel.add(tokenField,BorderLayout.CENTER);
+        loginPanel.add(submit,BorderLayout.EAST);
+        loginPanel.add(saveToken, BorderLayout.SOUTH);
+        loginWindow.setSize(250,30);
+        loginWindow.setResizable(false);
+        loginWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        tokenField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    if (saveToken.isSelected()) {
+                        PrintWriter tokenWriter = new PrintWriter("token");
+                        tokenWriter.write(tokenField.getText());
+                        tokenWriter.close();
+                    }
+                    init(tokenField.getText());
+                    loginWindow.setVisible(false);
+                    loginWindow.dispose();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.exit(0);
+                }
+            }
+        });
+
+        submit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                try {
+                    if (saveToken.isSelected()) {
+                        PrintWriter tokenWriter = new PrintWriter("token");
+                        tokenWriter.write(tokenField.getText());
+                        tokenWriter.close();
+                    }
+                    init(tokenField.getText());
+                    loginWindow.setVisible(false);
+                    loginWindow.dispose();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+            }
+        });
+
+        loginWindow.setVisible(true);
+    }
+
+    private static void init(String token) throws LoginException, InterruptedException, RateLimitedException, IOException {
+        jda = new JDABuilder(AccountType.CLIENT)    //Initialize the API
+                .setToken(token)                        //Log in with the token specified on stdin
+                .addEventListener(new MessageListener()) //Add a message listener to handle Discord events (messages, calls, etc.)
+                .buildBlocking();                       //Makes sure the API finishes initializing before continuing (as opposed to buildAsync()
+        guilds = jda.getGuilds();                       //Get a list of all the guilds the user is a member of
+        privateChannels = jda.getPrivateChannels();     //Get a list of all the user's private chats (note: these are chats the user has already created, not one for every contact/friend)
+        groups = jda.asClient().getGroups();            //Get a list of all the user's group chats
+        friends = jda.asClient().getFriends();          //Get a list of all the user's friends
+
         chatWindows     = new HashMap<>();
         chatIcons       = new HashMap<>();
 
-        try {
-            JDA jda = new JDABuilder(AccountType.CLIENT)    //Initialize the API
-                    .setToken(token)                        //Log in with the token specified on stdin
-                    .addEventListener(new MessageListener()) //Add a message listener to handle Discord events (messages, calls, etc.)
-                    .buildBlocking();                       //Makes sure the API finishes initializing before continuing (as opposed to buildAsync()
-            guilds = jda.getGuilds();                       //Get a list of all the guilds the user is a member of
-            privateChannels = jda.getPrivateChannels();     //Get a list of all the user's private chats (note: these are chats the user has already created, not one for every contact/friend)
-            textChannels = jda.getTextChannels();           //Get a list of all the text chats from the user's guilds
+        defaultUserIcon = getCircularImageFromURL(new URL(jda.getSelfUser().getDefaultAvatarUrl()));
 
-            defaultUserIcon = getCircularImageFromURL(new URL(jda.getSelfUser().getDefaultAvatarUrl()));
+        channelWindow = new JFrame();
+        channelWindow.setLayout(new BorderLayout());
+        channelWindow.add(new UITitleBar(), BorderLayout.NORTH);
+        channelWindow.setUndecorated(true);             //Remove the window border
+        channelWindow.setSize(400,700);
 
-            channelWindow = new JFrame();
-            channelWindow.setLayout(new BorderLayout());
-            channelWindow.add(new UITitleBar(), BorderLayout.NORTH);
-            channelWindow.setUndecorated(true);             //Remove the window border
-            channelWindow.setSize(400,700);
-
-            chatWindow = new JFrame();
-            chatWindow.setUndecorated(true);
-            chatWindow.setSize(400,700);
-            chatWindow.addFocusListener(new FocusAdapter() {
-                @Override
-                public void focusLost(FocusEvent focusEvent) {
-                    super.focusLost(focusEvent);
-                    chatWindow.setVisible(false);
-                }
-            });
+        chatWindow = new JFrame();
+        chatWindow.setUndecorated(true);
+        chatWindow.setSize(400,700);
+        chatWindow.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent focusEvent) {
+                super.focusLost(focusEvent);
+                chatWindow.setVisible(false);
+            }
+        });
 
 
-            bubbleWindow = new JFrame();
-            bubbleWindow.setSize(50,50);
-            bubbleWindow.setLocationRelativeTo(null);
-            bubbleWindow.setUndecorated(true);
-            bubbleWindow.setBackground(new Color(0,0,0,0));//Make the window transparent
-            bubbleWindow.setAlwaysOnTop(true);
-            bubbleWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Kill the program if the bubble window is closed
+        bubbleWindow = new JFrame();
+        bubbleWindow.setLocationRelativeTo(null);
+        bubbleWindow.setUndecorated(true);
+        bubbleWindow.setBackground(new Color(0,0,0,0));//Make the window transparent
+        bubbleWindow.setAlwaysOnTop(true);
+        bubbleWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //Kill the program if the bubble window is closed
 
-            bubblePane = new JPanel();
-            bubblePane.setLayout(new GridBagLayout());
-            bubblePane.setBackground(new Color(0,0,0,0));
+        bubblePane = new JPanel();
+        bubblePane.setLayout(new GridBagLayout());
+        bubblePane.setBackground(new Color(0,0,0,0));
 
-            gbc = new GridBagConstraints();
-            gbc.gridwidth = GridBagConstraints.REMAINDER;
-            gbc.weightx = 1;
-//            gbc.ipady = 45;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-            bubblePane.add(new UIFloatingButton(bubbleWindow, channelWindow), gbc, 0); //Add the channel list button
-            bubbleWindow.add(bubblePane);
-            bubbleWindow.setSize(50,50);
-            bubbleWindow.setVisible(true);
+        bubblePane.add(new UIFloatingButton(bubbleWindow, channelWindow), gbc, 0); //Add the channel list button
+        bubbleWindow.add(bubblePane);
+        bubbleWindow.setSize(50,50);
+        bubbleWindow.pack();
+        bubbleWindow.setVisible(true);
 
-            UIChannelList channelList = new UIChannelList();
-            channelList.addGuilds(guilds);
-            channelList.addPrivateChannels(privateChannels);
-            channelWindow.add(channelList, BorderLayout.CENTER);  //Add a channel list, currently only containing private channels, the the channel window
-            //TODO add Groups and Guild Text Channels to the channel list (see UIChannelList)
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (RateLimitedException e) {
-            e.printStackTrace();
-        } catch (LoginException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        UIChannelList channelList = new UIChannelList();
+        channelList.addGuilds(guilds);
+        channelList.addGroups(groups);
+        channelList.addPrivateChannels(privateChannels);
+        channelWindow.add(channelList, BorderLayout.CENTER);  //Add a channel list, currently only containing private channels, the the channel window
+        channelWindow.repaint();
+        channelWindow.revalidate();
     }
 
     /**
@@ -146,7 +214,7 @@ public class Main {
             else {
                 pc = new UIPrivateChat((PrivateChannel) channel);       //Otherwise, create a new UIChat
                 chatWindows.put(channel.getId(), pc);                   //Put it in chatWindows
-                addBubble(pc.getChannel(), getImage((PrivateChannel) channel));//And add a bubble for it
+                addBubble(pc.getChannel());//And add a bubble for it
             }
             chatWindow.setContentPane(pc);              //Update the current chat UI
             chatWindow.setVisible(true);                //Make sure chatWindow is displayed
@@ -161,10 +229,26 @@ public class Main {
             else {
                 tc = new UITextChat((TextChannel) channel);
                 chatWindows.put(channel.getId(), tc);
-                addBubble(tc.getChannel(), getImage(textChannel.getGuild()));
+                addBubble(tc.getChannel());
             }
 
             chatWindow.setContentPane(tc);              //Update the current chat UI
+            chatWindow.setVisible(true);                //Make sure chatWindow is displayed
+            chatWindow.revalidate();                    //Refresh the chat window
+            chatWindow.repaint();                       //..
+            channelWindow.setVisible(false);            //Hide the channel list
+        } else if (channel instanceof Group) {
+            UIGroupChat gc;
+            Group group = (Group) channel;
+            if (chatWindows.containsKey(channel.getId()))
+                gc = (UIGroupChat) chatWindows.get(channel.getId());
+            else {
+                gc = new UIGroupChat(group);
+                chatWindows.put(channel.getId(), gc);
+                addBubble(gc.getChannel());
+            }
+
+            chatWindow.setContentPane(gc);              //Update the current chat UI
             chatWindow.setVisible(true);                //Make sure chatWindow is displayed
             chatWindow.revalidate();                    //Refresh the chat window
             chatWindow.repaint();                       //..
@@ -177,8 +261,8 @@ public class Main {
      * Clicking the button will open the given channel inside a UIChat inside chatWindow
      * @param channel the channel to add a bubble for
      */
-    public static void addBubble(MessageChannel channel, ImageIcon imageIcon) {
-        bubblePane.add(new UIFloatingButton(channel, imageIcon), gbc, 0);
+    public static void addBubble(MessageChannel channel) {
+        bubblePane.add(new UIFloatingButton(channel), gbc, 0);
         resizeBubbles();
         repositionWindows();
     }
@@ -192,6 +276,19 @@ public class Main {
         bubbleWindow.setSize(50,bubblePane.getComponentCount()*65);                 //Increase the size of the bubble container
         bubbleWindow.revalidate();
         bubbleWindow.repaint();
+    }
+
+    public static ImageIcon getImage(MessageChannel channel) {
+        if (channel instanceof PrivateChannel)
+            return getImage((PrivateChannel) channel);
+        else if (channel instanceof TextChannel) {
+            TextChannel tc = (TextChannel) channel;
+            return getImage(tc.getGuild());
+        }
+        else if (channel instanceof Group)
+            return getImage((Group) channel);
+        else
+            return null;
     }
 
     public static ImageIcon getImage(Guild guild) {
@@ -219,12 +316,11 @@ public class Main {
                 chatIcons.put(group.getIconId(), image);
                 return image;
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                return defaultUserIcon;
             } catch (IOException e) {
-                e.printStackTrace();
+                return defaultUserIcon;
             }
         }
-        return null;
     }
 
     public static ImageIcon getImage(PrivateChannel privateChannel) {

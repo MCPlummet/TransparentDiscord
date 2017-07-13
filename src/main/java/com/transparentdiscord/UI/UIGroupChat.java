@@ -1,28 +1,29 @@
 package com.transparentdiscord.UI;
 
 import com.transparentdiscord.Main;
+import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.PrivateChannel;
+import net.dv8tion.jda.core.entities.User;
 
 import java.awt.*;
 
 /**
  * Created by liam on 7/11/17.
  */
-public class UITextChat extends UIChat {
-
+public class UIGroupChat extends UIChat {
     private GridBagConstraints c; //used to add new messages to the message list
     private MessageHistory messageHistory;
 
     /**
-     * Constructs a text channel from the given parameter
-     * @param textChannel the text channel to construct this UI around
+     * Constructs a group chat from the given parameter
+     * @param group the group to construct this UI around
      */
-    public UITextChat(TextChannel textChannel) {
+    public UIGroupChat(Group group) {
         super();
-        this.channel = textChannel;
-        this.messageHistory = textChannel.getHistory();
+        this.channel = group;
+        this.messageHistory = group.getHistory();
 
         //Set up gridbag to add new messages
         c = new GridBagConstraints();
@@ -41,9 +42,18 @@ public class UITextChat extends UIChat {
             doneLoad = true;
         });
 
-        add(new UITitleBar("<html>" +
-                textChannel.getGuild().getName() + "<br>#" +
-                channel.getName() + "</html>", Main.chatWindow), BorderLayout.NORTH);
+        StringBuilder name = new StringBuilder();
+        if (group.getName() == null) {
+            for (User user : group.getUsers())
+                name.append(user.getName() + ", ");
+            name.deleteCharAt(name.length()-1);
+            name.deleteCharAt(name.length()-1);
+        } else {
+            name.append(group.getName());
+        }
+
+        add(new UITitleBar(name.toString(), Main.chatWindow), BorderLayout.NORTH);
+
 
     }
 

@@ -20,14 +20,15 @@ public abstract class UIChat extends JPanel {
     protected JScrollBar        vertScrollBar;  //The scroll bar of the message list
     protected JTextField        messageField;   //The text field where the user will enter messages to send
     protected MessageChannel    channel;        //The message channel this UI is responsible for displaying
-    private AdjustmentListener  downScroll;     //Added to vertScrollBar to scroll the ScrollPane to the bottom
     private int                 tmpScrollValue; //Stores the previous maximum value before update of the vertical scroll bar
     private boolean             fixScroll;      //a boolean to keep track of the state of the scrollbar while loading older messages
+    protected boolean           doneLoad;       //prevents the UI from loading older messages before the initial messages have loaded
 
     public UIChat() {
         setLayout(new BorderLayout());
 
         fixScroll = false;
+        doneLoad = false;
 
         messageList = new JPanel(new GridBagLayout());
 
@@ -52,21 +53,12 @@ public abstract class UIChat extends JPanel {
 
         add(messageField, BorderLayout.SOUTH); //Add messageField at the bottom of UIChat, below the message list
 
-        downScroll = new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent e) {
-                Adjustable adjustable = e.getAdjustable();
-                adjustable.setValue(adjustable.getMaximum());
-                vertScrollBar.removeAdjustmentListener(this);
-            }
-        };
-
         vertScrollBar.setUnitIncrement(16);
         vertScrollBar.addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent e) {
                 Adjustable adjustable = e.getAdjustable();
-                if (adjustable.getValue() == 0 && !fixScroll) {
+                if (adjustable.getValue() == 0 && !fixScroll && doneLoad) {
                     tmpScrollValue = adjustable.getMaximum();
                     fixScroll = true;
                     loadMessageHistory();
@@ -113,6 +105,6 @@ public abstract class UIChat extends JPanel {
      * Scrolls the ScrollPane to the bottom
      */
     protected void scrollToBottom() {
-        vertScrollBar.addAdjustmentListener(downScroll);
+        scrollPane.getViewport().setViewPosition(new Point(0,Integer.MAX_VALUE));
     }
 }

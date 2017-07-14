@@ -22,7 +22,7 @@ dependencies {
 
 shadowJar {
     baseName = 'TransparentDiscord'
-    setDestinationDir(file('build/jar'))
+    setDestinationDir(file('Prebuilt'))
     classifier = null
 }
 

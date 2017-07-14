@@ -13,10 +13,9 @@ Discord API wrapper for Java, as well as the built in Java Swing Toolkit. My hop
 client in a compact, floating UI akin to the Google Hangouts Transparent UI. In its current state, TransparentDiscord is
 capable of facilitating text communication via Private/Direct Messages that have already been created.</p>
 
-<h3>Building</h3>
-<p>I am currently using Gradle to build TransparentDiscord, as per the instructions found in
-<a href="https://github.com/DV8FromTheWorld/JDA/wiki/2%29-Setup">the JDA Setup Guide</a>. After building with the shadowJar
-Gradle Task, you will find the runnable jarfile in <code>build/libs</code>.</p>
+<h3>Downloads</h3>
+<p>Downloads for the most recent development version can be found in the <code>Prebuilt</code> directory. For more stable versions,
+check the <a href="https://github.com/MCPlummet/TransparentDiscord/releases">releases</a> page.</p>
 
 <h3>Running</h3>
 <p>TransparentDiscord requires you to input your Discord User Token. To obtain this token, go to the Discord web client. If
@@ -28,13 +27,14 @@ your token will be saved in a text file in the same directory as the jar. Be adv
 <h3>Plans</h3>
 <p>TransparentDiscord is far from finished. Immidiate plans include:
 <bl>
-  <li>Adding file support</li>
-  <li>Adding support for creating new channels</li>
-  <li>Adding support for message reactions</li>
+  <li>Adding file/image upload support</li>
+  <li>Adding support for creating new groups</li>
+  <li>Message notifications</li>
+  <li>UI Improvements</li>
 </bl><br>
-Presently, the interface is using the default Swing appearance. Eventually that will need attention. A notification system
-needs to be devised, as well as support for setting and displaying statuses. At some point down the road, I'd also
-like to look into supporting voice calls.</p>
+Presently, the interface is using the default Swing appearance. Eventually that will need attention. At some point down the road,
+I'd also like to look into supporting voice calls, as well as implementing more of Discord's features, like custom emoji and message
+reactions.</p>
 
 <h3>Disclaimer</h3>
 <p>I am not in any way affiliated with the creators of Discord or the creators of JDA.</p>

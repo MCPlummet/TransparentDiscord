@@ -16,6 +16,10 @@ public class UIPrivateChat extends UIChat {
     private GridBagConstraints c; //used to add new messages to the message list
     private MessageHistory messageHistory;
 
+    /**
+     * Constructs a private channel from the given parameter
+     * @param privateChannel the private channel to construct this UI around
+     */
     public UIPrivateChat(PrivateChannel privateChannel) {
         super();
         this.channel = privateChannel;

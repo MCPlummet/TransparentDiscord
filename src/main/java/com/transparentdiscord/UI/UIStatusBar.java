@@ -13,7 +13,7 @@ import java.awt.event.MouseEvent;
 
 /**
  * Created by liam on 7/12/17.
- * Represents the status bar used at the bottom of the channel list
+ * Represents the
  */
 public class UIStatusBar extends JPanel {
 
@@ -28,9 +28,10 @@ public class UIStatusBar extends JPanel {
 
         icon = new JLabel(Main.resizeToWidth(image,25));
 
+        //Create a list of valid statuses; the user should not set their status to offline or unknown
+        OnlineStatus[] validStatuses = {OnlineStatus.ONLINE, OnlineStatus.IDLE, OnlineStatus.DO_NOT_DISTURB, OnlineStatus.INVISIBLE};
 
-
-        status = new JComboBox<OnlineStatus>(OnlineStatus.values());
+        status = new JComboBox<OnlineStatus>(validStatuses);
         newChat = new JLabel("Friends");
 
         icon.setBorder(new EmptyBorder(10,10,10,10));

@@ -206,6 +206,8 @@ public class Main {
         friendWindow.setSize(400,700);
         friendWindow.setLocationRelativeTo(channelWindow);
         friendWindow.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+
+        repositionWindows();
     }
 
     /**

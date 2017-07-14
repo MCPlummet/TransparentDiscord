@@ -14,6 +14,11 @@ import java.awt.event.MouseEvent;
  */
 public class UITitleBar extends JPanel {
 
+    /**
+     * Creates a title bar with the given text and ability to close the parent jframe
+     * @param titleText the text to display as the title
+     * @param parent the jframe to close when the X is clicked
+     */
     public UITitleBar(String titleText, JFrame parent) {
         setBackground(Color.decode("#7289DA"));
         setLayout(new BorderLayout());
@@ -34,7 +39,10 @@ public class UITitleBar extends JPanel {
         add(closeButton, BorderLayout.EAST);
     }
 
-
+    /**
+     * Blank constructor generates a title bar with the application name that
+     * closes down the program when the X is clicked
+     */
     public UITitleBar() {
         setBackground(Color.decode("#7289DA"));
         setLayout(new BorderLayout());

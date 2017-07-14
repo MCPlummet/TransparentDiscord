@@ -37,15 +37,27 @@ public class UIUserList extends JPanel {
         vertScrollBar.setUnitIncrement(16);
     }
 
+    /**
+     * Add a given user to the UI
+     * @param user the user to add
+     */
     public void addUser(User user) {
         userList.add(new UIUser(user),c,0);
     }
 
+    /**
+     * Add a list of users to the UI
+     * @param users the list of users to add
+     */
     public void addUsers(List<User> users) {
         for (UIUser item : UIUser.loadUsers(users))
             userList.add(item,c,0);
     }
 
+    /**
+     * Add a list of friends to the UI
+     * @param friends the list of friends to add
+     */
     public void addFriends(List<Friend> friends) {
         for (UIUser item : UIUser.loadFriends(friends))
             userList.add(item,c,0);

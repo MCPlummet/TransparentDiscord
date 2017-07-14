@@ -87,7 +87,7 @@ public class UIUser extends JPanel {
     /**
      * Batch convert a list of friends to UI elements
      * @param friends the list of friends to convert
-     * @return the dying screams of your friends as their souls are bound to this hideous UI
+     * @return a list of UIUsers created from the list of friends
      */
     public static List<UIUser> loadFriends(List<Friend> friends) {
         ArrayList<UIUser> list = new ArrayList<>();

@@ -21,9 +21,10 @@ import java.util.List;
 public class UIMessage extends JPanel {
 
     private Message message;    //The message to be displayed
-    private JLabel author;      //A JLabel containing the name of the message sender
+    private JLabel authorIcon;      //A JLabel containing the icon of the message sender
+    private JLabel authorName;      //A JLabel containing the name of the message sender
     //TODO make message text wrap
-    private JLabel messageText; //A JLabel containing the message text
+    private JTextArea messageText; //A JLabel containing the message text
     private JLabel timestamp;   //A JLabel containing the time the message was sent
     private JPanel attachments;//A JPanel containing any message attachments
     //TODO add support for images, call history, files, message reactions, profile images
@@ -43,7 +44,7 @@ public class UIMessage extends JPanel {
             if (a.isImage()) {
                 try {
                     //Get the image from the URL and resize it to the width of the chat window
-                    ImageIcon image = Main.resizeToWidth(Main.getImageFromURL(new URL(a.getUrl())), Main.getChatWidth());
+                    ImageIcon image = Main.resizeToWidth(Main.getImageFromURL(new URL(a.getUrl())), Main.getChatWidth()-30);
                     JLabel label = new JLabel(image);
                     attachments.add(label);
                 } catch (IOException e) {
@@ -62,12 +63,14 @@ public class UIMessage extends JPanel {
             }
         }
 
-        author = new JLabel(Main.getImage(message.getAuthor(),20,20));
-        author.setText(message.getAuthor().getName());
-        author.setHorizontalTextPosition(JLabel.CENTER);
-        author.setVerticalTextPosition(JLabel.BOTTOM);
-        author.setBorder(new EmptyBorder(10,10,10,10));             //Add a buffer around the author name
-        messageText = new JLabel(message.getContent());
+        authorIcon = new JLabel(Main.getImage(message.getAuthor(),20,20));
+        authorIcon.setBorder(new EmptyBorder(10,10,10,10));             //Add a buffer around the authorIcon name
+        authorName = new JLabel(message.getAuthor().getName());
+        messageText = new JTextArea(message.getContent());
+        messageText.setLineWrap(true);
+        messageText.setWrapStyleWord(true);
+        messageText.setOpaque(false);
+        messageText.setEditable(false);
 //      messageText.setBorder(new MatteBorder(0,1,0,0,Color.GRAY));
         timestamp = new JLabel(message.getCreationTime().getHour() + ":" + message.getCreationTime().getMinute());
         timestamp.setBorder(new EmptyBorder(10,10,10,10));          //Add a buffer around the timestamp
@@ -75,7 +78,8 @@ public class UIMessage extends JPanel {
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));             //Add a line at the bottom of the message
 
         add(attachments, BorderLayout.NORTH);
-        add(author, BorderLayout.WEST);
+        add(authorIcon, BorderLayout.WEST);
+        add(authorName, BorderLayout.SOUTH);
         add(messageText, BorderLayout.CENTER);
         add(timestamp, BorderLayout.EAST);
     }

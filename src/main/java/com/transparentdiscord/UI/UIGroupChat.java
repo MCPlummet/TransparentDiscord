@@ -11,6 +11,7 @@ import java.awt.*;
 
 /**
  * Created by liam on 7/11/17.
+ * Represents a chat built from a Group object
  */
 public class UIGroupChat extends UIChat {
     private GridBagConstraints c; //used to add new messages to the message list

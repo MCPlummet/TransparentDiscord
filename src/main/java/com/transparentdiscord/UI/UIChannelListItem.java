@@ -29,6 +29,9 @@ public class UIChannelListItem extends JPanel {
     private JLabel icon;
     private final int ICON_WIDTH = 40;
 
+    /**
+     * Sets up the common settings for the ListItem. The empty constructor should never be used on its own, so private.
+     */
     private UIChannelListItem() {
         setLayout(new BorderLayout());
 
@@ -71,6 +74,10 @@ public class UIChannelListItem extends JPanel {
         });
     }
 
+    /**
+     * Constructs a list item around a guild
+     * @param guild
+     */
     public UIChannelListItem(Guild guild) {
         this();
 
@@ -97,6 +104,10 @@ public class UIChannelListItem extends JPanel {
         });
     }
 
+    /**
+     * Constructs a list item around a text channel
+     * @param channel
+     */
     public UIChannelListItem(TextChannel channel) {
         this();
 
@@ -114,6 +125,10 @@ public class UIChannelListItem extends JPanel {
         });
     }
 
+    /**
+     * Constructs a list item around a group
+     * @param group
+     */
     public UIChannelListItem(Group group) {
         this();
 
@@ -167,6 +182,11 @@ public class UIChannelListItem extends JPanel {
         return list;
     }
 
+    /**
+     * Batch load a list of TextChannels
+     * @param channels
+     * @return a list of TextChannels converted to UI elements
+     */
     public static List<UIChannelListItem> loadTextChannels(List<TextChannel> channels) {
         ArrayList<UIChannelListItem> list = new ArrayList<>();
         for (TextChannel c : channels) {
@@ -175,6 +195,11 @@ public class UIChannelListItem extends JPanel {
         return list;
     }
 
+    /**
+     * Batch load a list of Groups
+     * @param groups
+     * @return a list of Groups converted to UI elements
+     */
     public static List<UIChannelListItem> loadGroups(List<Group> groups) {
         ArrayList<UIChannelListItem> list = new ArrayList<>();
         for (Group g : groups) {

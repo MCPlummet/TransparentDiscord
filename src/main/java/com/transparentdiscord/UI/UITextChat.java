@@ -9,6 +9,7 @@ import java.awt.*;
 
 /**
  * Created by liam on 7/11/17.
+ * Represents a guild text chat
  */
 public class UITextChat extends UIChat {
 

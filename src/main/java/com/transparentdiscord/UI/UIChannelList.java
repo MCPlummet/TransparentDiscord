@@ -58,14 +58,38 @@ public class UIChannelList extends JPanel {
             channelList.add(item,c,0);
     }
 
+    /**
+     * Add a list of TextChannels to the UI
+     * @param channels the TextChannels to add
+     */
     public void addTextChannels(List<TextChannel> channels) {
         for (UIChannelListItem item : UIChannelListItem.loadTextChannels(channels))
             channelList.add(item,c,channelList.getComponentCount());
     }
 
+    /**
+     * Add a list of Groups to the UI
+     * @param groups the list of Groups to add
+     */
     public void addGroups(List<Group> groups) {
         for (UIChannelListItem item : UIChannelListItem.loadGroups(groups))
             channelList.add(item,c,0);
+    }
+
+    /**
+     * Add a PrivateChannel to the UI
+     * @param privateChannel the PrivateChannel to add
+     */
+    public void addPrivateChannel(PrivateChannel privateChannel) {
+        channelList.add(new UIChannelListItem(privateChannel),c,0);
+    }
+
+    /**
+     * Add a Group to the UI
+     * @param group the Group to add
+     */
+    public void addGroup(Group group) {
+        channelList.add(new UIChannelListItem(group),c,0);
     }
 
     /**

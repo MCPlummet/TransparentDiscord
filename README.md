@@ -22,14 +22,13 @@ Gradle Task, you will find the runnable jarfile in <code>build/libs</code>.</p>
 <p>TransparentDiscord requires you to input your Discord User Token. To obtain this token, go to the Discord web client. If
 using Chrome, open the inspector (Ctrl + Shift + I), go to the Application tab, under Local Storage in the sidebar, select
 https://discordapp.com, scroll to the bottom, and get the "token" value. After running the built jar file (<code>java
--jar TransparentDiscord-X.X-all.jar</code>), paste in the token and press enter. JDA will print some initialization messages,
-then the UI will open.</p>
+-jar TransparentDiscord-X.X-all.jar</code>), paste in the token into the login window and click login. If you check remember,
+your token will be saved in a text file in the same directory as the jar. Be advised that the token is currently stored in plain text.</p>
 
 <h3>Plans</h3>
 <p>TransparentDiscord is far from finished. Immidiate plans include:
 <bl>
   <li>Adding file support</li>
-  <li>Adding support for group chats</li>
   <li>Adding support for creating new channels</li>
   <li>Adding support for message reactions</li>
 </bl><br>

@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 
 /**
  * Created by liam on 7/10/17.
+ * Represents a window bar of sorts, as most windows have no border
  */
 public class UITitleBar extends JPanel {
 
@@ -32,6 +33,7 @@ public class UITitleBar extends JPanel {
         closeButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         add(closeButton, BorderLayout.EAST);
     }
+
 
     public UITitleBar() {
         setBackground(Color.decode("#7289DA"));

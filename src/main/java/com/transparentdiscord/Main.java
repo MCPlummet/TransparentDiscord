@@ -5,6 +5,7 @@ import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
@@ -48,6 +49,9 @@ public class Main {
     public static JFrame channelWindow;                     //The JFrame responsible for displaying a UIChannelList
     public static JFrame chatWindow;                        //The JFrame responsible for displaying the active UIChat
     public static JFrame bubbleWindow;                      //The JFrame responsible for displaying the chat bubbles
+    public static JFrame friendWindow;                      //A window for displaying a friend list
+
+    public static UIChannelList channelList;                //The list of channels in channelWindow
 
     public static JPanel bubblePane;                        //The JPanel that contains the chat bubbles
     private static GridBagConstraints gbc;                  //Constraints for adding bubbles to bubblePane
@@ -57,32 +61,35 @@ public class Main {
 
     public static void main(String[] args) {
         File tokenFile = new File("token");
-        if (tokenFile.exists()) {
+        if (tokenFile.exists()) {           //Check if the token has been stored
             try {
-                String token = Files.readAllLines(Paths.get(tokenFile.getPath())).get(0);
-                init(token);
-            } catch (Exception e) {
+                String token = Files.readAllLines(Paths.get(tokenFile.getPath())).get(0); //Try to read the token
+                init(token); //And init with the token
+            } catch (Exception e) { //If that doesn't work, display the Token input UI
                 displayLoginPrompt();
                 e.printStackTrace();
             }
         } else {
-            displayLoginPrompt();
+            displayLoginPrompt();   //Otherwise, display the login prompt
         }
     }
 
+    /**
+     * Displays the Token input UI
+     */
     private static void displayLoginPrompt() {
-        JFrame loginWindow = new JFrame("Login");
-        JPanel loginPanel = new JPanel();
-        loginPanel.setLayout(new BorderLayout());
+        JFrame loginWindow = new JFrame("Login");       //The frame to hold the token UI
+        JPanel loginPanel = new JPanel();               //The panel to hold the token UI
+        loginPanel.setLayout(new BorderLayout());       //BorderLayout for now
         loginWindow.add(loginPanel);
-        JTextField tokenField = new JTextField();
-        JButton submit = new JButton("Log in");
-        JCheckBox saveToken = new JCheckBox("Remember");
+        JTextField tokenField = new JTextField();       //Token input
+        JButton submit = new JButton("Log in");         //Login button
+        JCheckBox saveToken = new JCheckBox("Remember");//Whether or not to save the token to a file
         loginPanel.add(tokenField,BorderLayout.CENTER);
         loginPanel.add(submit,BorderLayout.EAST);
         loginPanel.add(saveToken, BorderLayout.SOUTH);
-        loginWindow.setSize(250,30);
-        loginWindow.setResizable(false);
+        loginWindow.setSize(250,70);
+        loginWindow.setLocationRelativeTo(null);
         loginWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         tokenField.addActionListener(new ActionListener() {
@@ -127,6 +134,9 @@ public class Main {
     }
 
     private static void init(String token) throws LoginException, InterruptedException, RateLimitedException, IOException {
+        chatWindows     = new HashMap<>();
+        chatIcons       = new HashMap<>();
+
         jda = new JDABuilder(AccountType.CLIENT)    //Initialize the API
                 .setToken(token)                        //Log in with the token specified on stdin
                 .addEventListener(new MessageListener()) //Add a message listener to handle Discord events (messages, calls, etc.)
@@ -135,9 +145,6 @@ public class Main {
         privateChannels = jda.getPrivateChannels();     //Get a list of all the user's private chats (note: these are chats the user has already created, not one for every contact/friend)
         groups = jda.asClient().getGroups();            //Get a list of all the user's group chats
         friends = jda.asClient().getFriends();          //Get a list of all the user's friends
-
-        chatWindows     = new HashMap<>();
-        chatIcons       = new HashMap<>();
 
         defaultUserIcon = getCircularImageFromURL(new URL(jda.getSelfUser().getDefaultAvatarUrl()));
 
@@ -181,13 +188,24 @@ public class Main {
         bubbleWindow.pack();
         bubbleWindow.setVisible(true);
 
-        UIChannelList channelList = new UIChannelList();
+        channelList = new UIChannelList();
         channelList.addGuilds(guilds);
         channelList.addGroups(groups);
         channelList.addPrivateChannels(privateChannels);
         channelWindow.add(channelList, BorderLayout.CENTER);  //Add a channel list, currently only containing private channels, the the channel window
+
+        channelWindow.add(new UIStatusBar(getImage(jda.getSelfUser())), BorderLayout.SOUTH);
+
         channelWindow.repaint();
         channelWindow.revalidate();
+
+        friendWindow = new JFrame("Friends");
+        UIUserList friendList = new UIUserList();
+        friendList.addFriends(jda.asClient().getFriends());
+        friendWindow.add(friendList);
+        friendWindow.setSize(400,700);
+        friendWindow.setLocationRelativeTo(channelWindow);
+        friendWindow.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
     }
 
     /**
@@ -207,6 +225,14 @@ public class Main {
      * @param channel the channel to open
      */
     public static void openChat(MessageChannel channel) {
+        //If the chat is already open...
+        if (chatWindows.containsKey(channel.getId()) &&
+                chatWindow.getContentPane().equals(chatWindows.get(channel.getId())) &&
+                chatWindow.isVisible())
+        {
+            chatWindow.setVisible(false);   //Minimize the chat window
+            return;                         //No need to continue
+        }
         if (channel instanceof PrivateChannel) {                        //If the channel is a private channel...
             UIPrivateChat pc;
             if (chatWindows.containsKey(channel.getId()))               //If the channel has already been opened...
@@ -278,6 +304,11 @@ public class Main {
         bubbleWindow.repaint();
     }
 
+    /**
+     * Returns an image for a generic message channel
+     * @param channel The channel to retrieve an image for
+     * @return either a profile image, Guild icon, or group icon depending on the channel type
+     */
     public static ImageIcon getImage(MessageChannel channel) {
         if (channel instanceof PrivateChannel)
             return getImage((PrivateChannel) channel);
@@ -291,6 +322,10 @@ public class Main {
             return null;
     }
 
+    /**
+     * @param guild The guild to get an icon for
+     * @return The guild's icon, or if no icon is found, the default user icon
+     */
     public static ImageIcon getImage(Guild guild) {
         if (chatIcons.containsKey(guild.getIconId()))
             return chatIcons.get(guild.getIconId());
@@ -307,7 +342,12 @@ public class Main {
         }
     }
 
+    /**
+     * @param group The group to get an icon for
+     * @return The group's icon, or if no icon is found, the default user icon
+     */
     public static ImageIcon getImage(Group group) {
+        //TODO construct icon from users in group?
         if (chatIcons.containsKey(group.getIconId()))
             return chatIcons.get(group.getIconId());
         else {
@@ -323,10 +363,18 @@ public class Main {
         }
     }
 
+    /**
+     * @param privateChannel the private channel to get an icon for
+     * @return the icon of the user the private channel communicates with
+     */
     public static ImageIcon getImage(PrivateChannel privateChannel) {
         return getImage(privateChannel.getUser());
     }
 
+    /**
+     * @param user the user to get an icon for
+     * @return the icon of the user or the default user icon
+     */
     public static ImageIcon getImage(User user) {
         if (chatIcons.containsKey(user.getAvatarId()))
             return chatIcons.get(user.getAvatarId());
@@ -343,12 +391,25 @@ public class Main {
         }
     }
 
+    /**
+     * Returns a user icon with a given size
+     * @param user the user to get an icon for
+     * @param width the width of the desired icon
+     * @param height the height of the desired icon
+     * @return a resized user icon
+     */
     public static ImageIcon getImage(User user, int width, int height) {
         Image image = getImage(user).getImage();
         image = image.getScaledInstance(width,height,Image.SCALE_SMOOTH);
         return new ImageIcon(image);
     }
 
+    /**
+     * Returns an image from a URL
+     * @param url the url of the image
+     * @return the image located at the given URL
+     * @throws IOException
+     */
     public static ImageIcon getImageFromURL(URL url) throws IOException {
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty(
@@ -358,6 +419,12 @@ public class Main {
         return new ImageIcon(image);
     }
 
+    /**
+     * Returns an image from a URL clipped to a circle
+     * @param url the url of the image
+     * @return a circular cropped image located at the given URL
+     * @throws IOException
+     */
     public static ImageIcon getCircularImageFromURL(URL url) throws IOException {
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestProperty(
@@ -367,10 +434,22 @@ public class Main {
         return new ImageIcon(clipToCircle(image));
     }
 
+    /**
+     * Retrieve an image from the filesystem
+     * @param path the path to the image
+     * @return the image at the given path
+     */
     public static ImageIcon getImageFromFile(URL path) {
         return new ImageIcon(path);
     }
 
+    /**
+     * Retrieve a scaled image from the filesystem
+     * @param path the path to the image
+     * @param width the desired width of the image
+     * @param height the desired height of the image
+     * @return the image at the given path with the given width and height
+     */
     public static ImageIcon getScaledImageFromFile(URL path, int width, int height) {
         Image image = getImageFromFile(path).getImage();
         image = image.getScaledInstance(width,height,Image.SCALE_SMOOTH);
@@ -430,4 +509,12 @@ public class Main {
     }
 
     public static ImageIcon getDefaultUserIcon() { return defaultUserIcon; }
+
+    /**
+     * Sets the logged in user's status
+     * @param status the status to set the user to
+     */
+    public static void setStatus(OnlineStatus status) {
+        jda.getPresence().setStatus(status);
+    }
 }

@@ -87,6 +87,9 @@ public abstract class UIChat extends JPanel {
      */
     protected abstract void loadMessageHistory();
 
+    /**
+     * Refreshes the window
+     */
     protected void refresh() {
         messageList.repaint();
         messageList.revalidate();

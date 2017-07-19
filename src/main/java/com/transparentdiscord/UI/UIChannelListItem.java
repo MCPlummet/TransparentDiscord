@@ -58,6 +58,7 @@ public class UIChannelListItem extends JPanel {
         this();
 
         displayName = new JLabel(channel.getName());
+        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
         icon = new JLabel(Main.resizeToWidth(Main.getImage(channel),ICON_WIDTH));
@@ -82,6 +83,7 @@ public class UIChannelListItem extends JPanel {
         this();
 
         displayName = new JLabel(guild.getName());
+        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
         icon = new JLabel(Main.resizeToWidth(Main.getImage(guild),ICON_WIDTH));
@@ -112,6 +114,7 @@ public class UIChannelListItem extends JPanel {
         this();
 
         displayName = new JLabel(channel.getName());
+        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
         add(displayName, BorderLayout.CENTER);
@@ -142,6 +145,7 @@ public class UIChannelListItem extends JPanel {
             name.append(group.getName());
         }
         displayName = new JLabel(name.toString());
+        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
         icon = new JLabel(Main.resizeToWidth(Main.getImage(group),ICON_WIDTH));

@@ -46,6 +46,7 @@ public class UIUser extends JPanel {
         this.user = user;
 
         displayName = new JLabel(user.getName());
+        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
         icon = new JLabel(Main.resizeToWidth(Main.getImage(user),ICON_WIDTH));

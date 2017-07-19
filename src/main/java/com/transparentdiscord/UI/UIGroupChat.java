@@ -59,11 +59,6 @@ public class UIGroupChat extends UIChat {
     }
 
     @Override
-    protected void sendMessage(String message) {
-        channel.sendMessage(message).queue();
-    }
-
-    @Override
     public void receiveMessage(Message message) {
         messageList.add(new UIMessage(message), c, messageList.getComponentCount()); //Add the received message at the bottom of the message list
         refresh();

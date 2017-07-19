@@ -1,11 +1,18 @@
 package com.transparentdiscord.UI;
 
 import com.transparentdiscord.Main;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 
 import java.awt.*;
+import java.io.IOException;
+import java.security.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static java.lang.System.out;
 
 /**
  * Created by liam on 6/23/17.
@@ -43,11 +50,6 @@ public class UIPrivateChat extends UIChat {
         });
 
         add(new UITitleBar(channel.getName(), Main.chatWindow), BorderLayout.NORTH);
-    }
-
-    @Override
-    protected void sendMessage(String message) {
-        channel.sendMessage(message).queue();
     }
 
     @Override

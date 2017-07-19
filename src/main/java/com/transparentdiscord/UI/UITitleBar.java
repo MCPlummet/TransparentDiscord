@@ -16,7 +16,7 @@ public class UITitleBar extends JPanel {
 
     /**
      * Creates a title bar with the given text and ability to close the parent jframe
-     * @param titleText the text to display as the title
+     * @param titleText the text to display as the title, can be HTML formatted
      * @param parent the jframe to close when the X is clicked
      */
     public UITitleBar(String titleText, JFrame parent) {
@@ -24,6 +24,7 @@ public class UITitleBar extends JPanel {
         setLayout(new BorderLayout());
 
         JLabel title = new JLabel(titleText);
+        title.setFont(Main.defaultFont.deriveFont(Font.BOLD, 16));
         title.setBorder(new EmptyBorder(20,20,20,20));
         add(title, BorderLayout.WEST);
 

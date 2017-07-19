@@ -20,6 +20,7 @@ import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -58,6 +59,9 @@ public class Main {
 
     private static ImageIcon defaultUserIcon;               //The default user icon (Discord logo with yellow background)
     private static JDA jda;                                 //The object used to interface with Discord
+
+    public static Font defaultFont;                         //The font to use for TransparentDiscord
+    private static final String FONT_PATH = "/fonts/roboto/Roboto-Medium.ttf"; //The path to the font
 
     public static void main(String[] args) {
         File tokenFile = new File("token");
@@ -146,6 +150,15 @@ public class Main {
         groups = jda.asClient().getGroups();            //Get a list of all the user's group chats
         friends = jda.asClient().getFriends();          //Get a list of all the user's friends
 
+        try {
+            InputStream stream = Main.class.getResourceAsStream(FONT_PATH);
+            defaultFont = Font.createFont(Font.TRUETYPE_FONT, stream);
+
+        } catch (Exception e) {
+            out.println("failed to load font, using builtin");
+            defaultFont = new Font("Helvetica", Font.PLAIN, 12);
+        }
+
         defaultUserIcon = getCircularImageFromURL(new URL(jda.getSelfUser().getDefaultAvatarUrl()));
 
         channelWindow = new JFrame();
@@ -157,13 +170,6 @@ public class Main {
         chatWindow = new JFrame();
         chatWindow.setUndecorated(true);
         chatWindow.setSize(400,700);
-        chatWindow.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent focusEvent) {
-                super.focusLost(focusEvent);
-                chatWindow.setVisible(false);
-            }
-        });
 
 
         bubbleWindow = new JFrame();

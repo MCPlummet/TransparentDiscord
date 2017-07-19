@@ -67,6 +67,7 @@ public class UIMessage extends JPanel {
         authorIcon.setBorder(new EmptyBorder(10,10,10,10));             //Add a buffer around the authorIcon name
         authorName = new JLabel(message.getAuthor().getName());
         messageText = new JTextArea(message.getContent());
+        messageText.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 12));
         messageText.setLineWrap(true);
         messageText.setWrapStyleWord(true);
         messageText.setOpaque(false);

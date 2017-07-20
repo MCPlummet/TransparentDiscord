@@ -8,6 +8,7 @@ import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.OnlineStatus;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import sun.misc.IOUtils;
 
 import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
@@ -68,6 +69,7 @@ public class Main {
 
 
     public static void main(String[] args) {
+        System.setProperty("http.agent", "Mozilla/5.0 AppleWebKit/537.31 Chrome/26.0.1410.65 Safari/537.31");
         File tokenFile = new File("token");
         if (tokenFile.exists()) {           //Check if the token has been stored
             try {
@@ -308,6 +310,17 @@ public class Main {
         }
     }
 
+    public static void receiveMessage(Message message, MessageChannel channel) {
+        channelList.update(message);
+        if (chatWindows.containsKey(channel.getId())) {                //If the chat is currently open in the UI
+            chatWindows.get(channel.getId()).receiveMessage(message);  //Update the chat with the received message
+        }
+        channelList.revalidate();
+        channelList.repaint();
+        channelWindow.revalidate();
+        channelWindow.repaint();
+    }
+
     /**
      * Adds a bubble to the bubble list for a given channel
      * Clicking the button will open the given channel inside a UIChat inside chatWindow
@@ -451,13 +464,8 @@ public class Main {
      * @return the image located at the given URL
      * @throws IOException
      */
-    public static ImageIcon getImageFromURL(URL url) throws IOException {
-        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty(
-                "User-Agent",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31");
-        final BufferedImage image = ImageIO.read(connection.getInputStream());
-        return new ImageIcon(image);
+    public static ImageIcon getImageFromURL(URL url) {
+        return new ImageIcon(url);
     }
 
     /**
@@ -501,6 +509,12 @@ public class Main {
         float ratio = (float) image.getIconHeight()/image.getIconWidth();
         int height = (int) (ratio * width);
         return new ImageIcon(image.getImage().getScaledInstance(width,height,Image.SCALE_SMOOTH));
+    }
+
+    public static ImageIcon resizeToWidthAnimated(ImageIcon image, int width) {
+        float ratio = (float) image.getIconHeight()/image.getIconWidth();
+        int height = (int) (ratio * width);
+        return new ImageIcon(image.getImage().getScaledInstance(width,height,Image.SCALE_DEFAULT));
     }
 
     /**

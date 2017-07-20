@@ -13,7 +13,6 @@ import java.awt.event.MouseEvent;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static java.lang.System.out;
 
@@ -201,6 +200,23 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
 
     public String getID() { return id; }
     public OffsetDateTime getTime() { return time; }
+
+    public void updatePreview(Message message) {
+        if (message.getContent().equals("") && message.getAttachments().size() > 0) {
+            if (message.getAttachments().get(0).isImage()) {
+                messagePreview.setText(message.getAuthor().getName() +" sent an image.");
+            }
+            else {
+                messagePreview.setText(message.getAuthor().getName() +" sent a file.");
+            }
+        }
+        else {
+            messagePreview.setText(message.getAuthor().getName() +": " + message.getContent());
+        }
+        time = message.getCreationTime();
+        revalidate();
+        repaint();
+    }
 
     @Override
     public int compareTo(UIChannelListItem other) {

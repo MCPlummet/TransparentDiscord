@@ -27,9 +27,7 @@ public class MessageListener extends ListenerAdapter {
 
         boolean bot = author.isBot();
 
-        if (Main.chatWindows.containsKey(channel.getId())) {                //If the chat is currently open in the UI
-            Main.chatWindows.get(channel.getId()).receiveMessage(message);  //Update the chat with the received message
-        }
+        Main.receiveMessage(message, channel);
     }
 
     @Override

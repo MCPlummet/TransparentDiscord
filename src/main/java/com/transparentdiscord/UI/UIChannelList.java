@@ -2,12 +2,14 @@ package com.transparentdiscord.UI;
 
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -16,13 +18,16 @@ import java.util.List;
  */
 public class UIChannelList extends JPanel {
 
-    protected JTabbedPane tabPane;              //Separates Private and Group chats from Guilds
-    protected JPanel channelList;               //The list of channels
-    protected JPanel guildList;                 //The list of channels
-    protected JScrollPane channelScrollPane;    //Allows the user to scroll through the list of channels, should it become too large
-    protected JScrollBar vertScrollBarChannels; //The scrollbar of the channel list
-    protected JScrollPane guildScrollPane;      //Allows the user to scroll through the list of guilds
-    protected JScrollBar vertScrollBarGuilds;   //The scrollbar of the guildlist
+    private JTabbedPane tabPane;              //Separates Private and Group chats from Guilds
+    private JPanel channelList;               //The list of channels
+    private JPanel guildList;                 //The list of channels
+
+    private JScrollPane channelScrollPane;    //Allows the user to scroll through the list of channels, should it become too large
+    private JScrollBar vertScrollBarChannels; //The scrollbar of the channel list
+    private JScrollPane guildScrollPane;      //Allows the user to scroll through the list of guilds
+    private JScrollBar vertScrollBarGuilds;   //The scrollbar of the guildlist
+    
+    private HashMap<String, UIChannelListItem> channelItems; //Keeps track of channels so that they can be updated
     private GridBagConstraints c;               //Used to add items to the channel list
     private boolean tabbed;
 
@@ -33,6 +38,8 @@ public class UIChannelList extends JPanel {
     public UIChannelList(boolean tabbed) {
         setLayout(new BorderLayout());
         this.tabbed = tabbed;
+
+        channelItems = new HashMap<>();
 
         channelList = new JPanel(new GridBagLayout());
         channelScrollPane = new JScrollPane(channelList);
@@ -72,8 +79,10 @@ public class UIChannelList extends JPanel {
     public void addPrivateChannels(List<PrivateChannel> channels) {
         List<UIChannelListItem> uiChannels = UIChannelListItem.loadPrivateChannels(channels);
         Collections.sort(uiChannels);
-        for (UIChannelListItem item : uiChannels)
-            channelList.add(item,c,channelList.getComponentCount());
+        for (UIChannelListItem item : uiChannels) {
+            channelList.add(item, c, channelList.getComponentCount());
+            channelItems.put(item.getID(), item);
+        }
     }
 
     /**
@@ -84,6 +93,7 @@ public class UIChannelList extends JPanel {
         for (UIChannelListItem item : UIChannelListItem.loadGuilds(guilds)) {
             if (tabbed) guildList.add(item, c, 0);
             else channelList.add(item,c,0);
+            channelItems.put(item.getID(), item);
         }
     }
 
@@ -92,8 +102,10 @@ public class UIChannelList extends JPanel {
      * @param channels the TextChannels to add
      */
     public void addTextChannels(List<TextChannel> channels) {
-        for (UIChannelListItem item : UIChannelListItem.loadTextChannels(channels))
-            channelList.add(item,c,channelList.getComponentCount());
+        for (UIChannelListItem item : UIChannelListItem.loadTextChannels(channels)) {
+            channelList.add(item, c, channelList.getComponentCount());
+            channelItems.put(item.getID(), item);
+        }
     }
 
     /**
@@ -101,16 +113,20 @@ public class UIChannelList extends JPanel {
      * @param groups the list of Groups to add
      */
     public void addGroups(List<Group> groups) {
-        for (UIChannelListItem item : UIChannelListItem.loadGroups(groups))
-            channelList.add(item,c,0);
+        for (UIChannelListItem item : UIChannelListItem.loadGroups(groups)) {
+            channelList.add(item, c, 0);
+            channelItems.put(item.getID(), item);
+        }
     }
 
     public void addGroupsAndPrivateChannels(List<Group> groups, List<PrivateChannel> channels) {
         List<UIChannelListItem> uiItems = UIChannelListItem.loadGroups(groups);
         uiItems.addAll(UIChannelListItem.loadPrivateChannels(channels));
         Collections.sort(uiItems);
-        for (UIChannelListItem item : uiItems)
-            channelList.add(item,c,channelList.getComponentCount());
+        for (UIChannelListItem item : uiItems) {
+            channelList.add(item, c, channelList.getComponentCount());
+            channelItems.put(item.getID(), item);
+        }
     }
 
     /**
@@ -118,7 +134,9 @@ public class UIChannelList extends JPanel {
      * @param privateChannel the PrivateChannel to add
      */
     public void addPrivateChannel(PrivateChannel privateChannel) {
-        channelList.add(new UIChannelListItem(privateChannel),c,0);
+        UIChannelListItem item = new UIChannelListItem(privateChannel);
+        channelList.add(item,c,0);
+        channelItems.put(item.getID(), item);
     }
 
     /**
@@ -126,17 +144,33 @@ public class UIChannelList extends JPanel {
      * @param group the Group to add
      */
     public void addGroup(Group group) {
-        channelList.add(new UIChannelListItem(group),c,0);
+        UIChannelListItem item = new UIChannelListItem(group);
+        channelList.add(item,c,0);
+        channelItems.put(item.getID(), item);
+    }
+
+    public void update(Message message) {
+        if (message.getChannel() instanceof Guild) {
+            UIChannelListItem item = channelItems.get(message.getChannel().getId());
+            channelList.remove(item);
+            channelList.add(item,c,0);
+            item.updatePreview(message);
+            refresh();
+        }
     }
 
     /**
      * Refresh the channel list to display newly added elements
      */
-    protected void refresh() {
-        channelList.repaint();
+    private void refresh() {
         channelList.revalidate();
-        channelScrollPane.repaint();
+        channelList.repaint();
         channelScrollPane.revalidate();
+        channelScrollPane.repaint();
+        if (tabbed) {
+            tabPane.revalidate();
+            tabPane.repaint();
+        }
         repaint();
         revalidate();
     }

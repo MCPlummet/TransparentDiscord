@@ -40,8 +40,11 @@ public class UIFloatingButton extends JPanel {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) { //show and hide the child when clicked
                 Main.chatWindow.setVisible(false);
-                if (!child.isVisible())
+                if (!child.isVisible()) {
                     child.setVisible(true);
+                    child.revalidate();
+                    child.repaint();
+                }
                 else
                     child.setVisible(false);
                 parent.setBackground(new Color(0,0,0,0));

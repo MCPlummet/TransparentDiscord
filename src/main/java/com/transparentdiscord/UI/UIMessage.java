@@ -14,6 +14,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.System.out;
+
 /**
  * Created by liam on 6/23/17.
  * Represents a single message as it is to be displayed to the user
@@ -44,8 +46,14 @@ public class UIMessage extends JPanel {
             if (a.isImage()) {
                 try {
                     //Get the image from the URL and resize it to the width of the chat window
-                    ImageIcon image = Main.resizeToWidth(Main.getImageFromURL(new URL(a.getUrl())), Main.getChatWidth()-30);
+                    ImageIcon image = Main.getImageFromURL(new URL(a.getUrl()));
+
+                    //If the image is animated, we can't use smooth scaling
+                    if (a.getUrl().contains(".gif")) image = Main.resizeToWidthAnimated(image, Main.getChatWidth()-30);
+                    else image = Main.resizeToWidth(image, Main.getChatWidth()-30);
+                    
                     JLabel label = new JLabel(image);
+                    image.setImageObserver(this);
                     attachments.add(label);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -63,7 +71,7 @@ public class UIMessage extends JPanel {
             }
         }
 
-        authorIcon = new JLabel(Main.getImage(message.getAuthor(),20,20));
+        authorIcon = new JLabel(Main.getImage(message.getAuthor(),25,25));
         authorIcon.setBorder(new EmptyBorder(10,10,10,10));             //Add a buffer around the authorIcon name
         authorName = new JLabel(message.getAuthor().getName());
         messageText = new JTextArea(message.getContent());

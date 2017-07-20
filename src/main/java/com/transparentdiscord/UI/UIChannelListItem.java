@@ -3,7 +3,6 @@ package com.transparentdiscord.UI;
 import com.transparentdiscord.Main;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.requests.Route;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,11 +10,10 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.lang.System.out;
 
@@ -23,30 +21,44 @@ import static java.lang.System.out;
  * Created by liam on 6/26/17.
  * Represents an individual channel/chat to be used in a UIChannelList
  */
-public class UIChannelListItem extends JPanel {
+public class UIChannelListItem extends JPanel implements Comparable<UIChannelListItem> {
 
     private JLabel displayName;     //A JLabel containing the name of the channel/guild
+    private JLabel messagePreview;  //Previews the most recent message
+    private JPanel content;         //Holds the displayName and messagePreview JLabels
     private JLabel icon;
     private final int ICON_WIDTH = 40;
+    private final String id;
+    private OffsetDateTime time;
 
     /**
      * Sets up the common settings for the ListItem. The empty constructor should never be used on its own, so private.
      */
-    private UIChannelListItem() {
+    private UIChannelListItem(String id) {
         setLayout(new BorderLayout());
 
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
-        addMouseListener(new MouseAdapter() {
+        content = new JPanel(new BorderLayout());
+
+        this.id = id;
+
+        MouseAdapter hoverChange = new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent mouseEvent) {
                 setBackground(Color.decode("#99AAB5"));
+                content.setBackground(Color.decode("#99AAB5"));
             }
 
-            @Override public void mouseExited(MouseEvent mouseEvent) {
+            @Override
+            public void mouseExited(MouseEvent mouseEvent) {
                 setBackground(Color.WHITE);
+                content.setBackground(Color.WHITE);
             }
-        });
+        };
+
+        addMouseListener(hoverChange);
+
         setCursor(new Cursor(Cursor.HAND_CURSOR)); //Indicate to the user that this element is meant to be clicked
     }
 
@@ -55,15 +67,28 @@ public class UIChannelListItem extends JPanel {
      * @param channel the channel to create the list item from
      */
     public UIChannelListItem(PrivateChannel channel) {
-        this();
+        this(channel.getId());
 
         displayName = new JLabel(channel.getName());
-        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
-        displayName.setBorder(new EmptyBorder(10,10,10,10));
+        displayName.setBorder(new EmptyBorder(5,0,0,0));
+        displayName.setFont(Main.boldFont.deriveFont(Font.PLAIN, 12));
+
+        try {
+            messagePreview = new JLabel();
+            messagePreview.setFont(Main.defaultFont.deriveFont(Font.PLAIN,12));
+            Message m = channel.getHistory().retrievePast(1).complete().get(0);
+            messagePreview.setText(m.getAuthor().getName() +": " + m.getContent());
+            time = m.getCreationTime();
+            content.add(messagePreview, BorderLayout.CENTER);
+        } catch (Exception e) {
+            out.println("Channel " + channel.getName() + " does not have any messages");
+        }
 
         icon = new JLabel(Main.resizeToWidth(Main.getImage(channel),ICON_WIDTH));
+        icon.setBorder(new EmptyBorder(5,5,5,5));
 
-        add(displayName, BorderLayout.CENTER);
+        content.add(displayName, BorderLayout.NORTH);
+        add(content, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
 
         //When clicked, open the chat
@@ -80,7 +105,7 @@ public class UIChannelListItem extends JPanel {
      * @param guild
      */
     public UIChannelListItem(Guild guild) {
-        this();
+        this(guild.getId());
 
         displayName = new JLabel(guild.getName());
         displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
@@ -91,7 +116,7 @@ public class UIChannelListItem extends JPanel {
         add(displayName, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
 
-        UIChannelList channelList = new UIChannelList();
+        UIChannelList channelList = new UIChannelList(false);
         channelList.addTextChannels(guild.getTextChannels());
 
         JPopupMenu channelMenu = new JPopupMenu();
@@ -111,7 +136,7 @@ public class UIChannelListItem extends JPanel {
      * @param channel
      */
     public UIChannelListItem(TextChannel channel) {
-        this();
+        this(channel.getId());
 
         displayName = new JLabel(channel.getName());
         displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
@@ -133,7 +158,7 @@ public class UIChannelListItem extends JPanel {
      * @param group
      */
     public UIChannelListItem(Group group) {
-        this();
+        this(group.getId());
 
         StringBuilder name = new StringBuilder();
         if (group.getName() == null) {
@@ -145,12 +170,25 @@ public class UIChannelListItem extends JPanel {
             name.append(group.getName());
         }
         displayName = new JLabel(name.toString());
-        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
-        displayName.setBorder(new EmptyBorder(10,10,10,10));
+        displayName.setBorder(new EmptyBorder(5,0,0,0));
+        displayName.setFont(Main.boldFont.deriveFont(Font.PLAIN, 12));
+
+        try {
+            messagePreview = new JLabel();
+            messagePreview.setFont(Main.defaultFont.deriveFont(Font.PLAIN,12));
+            Message m = group.getHistory().retrievePast(1).complete().get(0);
+            messagePreview.setText(m.getAuthor().getName() +": " + m.getContent());
+            time = m.getCreationTime();
+            content.add(messagePreview, BorderLayout.CENTER);
+        } catch (Exception e) {
+            out.println("Channel " + group.getName() + " does not have any messages");
+        }
 
         icon = new JLabel(Main.resizeToWidth(Main.getImage(group),ICON_WIDTH));
+        icon.setBorder(new EmptyBorder(5,5,5,5));
 
-        add(displayName, BorderLayout.CENTER);
+        content.add(displayName, BorderLayout.NORTH);
+        add(content, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
 
         addMouseListener(new MouseAdapter() {
@@ -159,6 +197,19 @@ public class UIChannelListItem extends JPanel {
                 Main.openChat(group);
             }
         });
+    }
+
+    public String getID() { return id; }
+    public OffsetDateTime getTime() { return time; }
+
+    @Override
+    public int compareTo(UIChannelListItem other) {
+        if (getTime() == null) return 1;
+        if (other.getTime() == null) return -1;
+
+        if (getTime().isAfter(other.getTime())) return -1;
+        else if (getTime().isBefore(other.getTime())) return 1;
+        else return 0;
     }
 
     /**

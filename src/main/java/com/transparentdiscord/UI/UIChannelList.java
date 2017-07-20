@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,29 +16,53 @@ import java.util.List;
  */
 public class UIChannelList extends JPanel {
 
-    protected JPanel channelList;       //The list of channels
-    protected JScrollPane scrollPane;   //Allows the user to scroll through the list of channels, should it become too large
-    protected JScrollBar vertScrollBar; //The scrollbar of the channel list
-    private GridBagConstraints c;       //Used to add items to the channel list
+    protected JTabbedPane tabPane;              //Separates Private and Group chats from Guilds
+    protected JPanel channelList;               //The list of channels
+    protected JPanel guildList;                 //The list of channels
+    protected JScrollPane channelScrollPane;    //Allows the user to scroll through the list of channels, should it become too large
+    protected JScrollBar vertScrollBarChannels; //The scrollbar of the channel list
+    protected JScrollPane guildScrollPane;      //Allows the user to scroll through the list of guilds
+    protected JScrollBar vertScrollBarGuilds;   //The scrollbar of the guildlist
+    private GridBagConstraints c;               //Used to add items to the channel list
+    private boolean tabbed;
 
     /**
      * Constructs and empty channel list element
+     * @param tabbed whether or not to construct the list with tabs
      */
-    public UIChannelList() {
+    public UIChannelList(boolean tabbed) {
         setLayout(new BorderLayout());
+        this.tabbed = tabbed;
 
         channelList = new JPanel(new GridBagLayout());
+        channelScrollPane = new JScrollPane(channelList);
 
-        scrollPane = new JScrollPane(channelList);
-        add(scrollPane);
+        if (tabbed) {
+            guildList = new JPanel(new GridBagLayout());
+            guildScrollPane = new JScrollPane(guildList);
+
+            tabPane = new JTabbedPane();
+            tabPane.setBackground(Color.decode("#99AAB5"));
+            tabPane.addTab("Chats", channelScrollPane);
+            tabPane.addTab("Servers", guildScrollPane);
+
+            vertScrollBarGuilds = guildScrollPane.getVerticalScrollBar();
+            vertScrollBarGuilds.setUnitIncrement(16);
+
+            add(tabPane);
+        } else {
+            add(channelScrollPane);
+        }
+
+
 
         c = new GridBagConstraints();
         c.gridwidth = GridBagConstraints.REMAINDER;
         c.weightx = 1;
         c.fill = GridBagConstraints.HORIZONTAL;
 
-        vertScrollBar = scrollPane.getVerticalScrollBar();
-        vertScrollBar.setUnitIncrement(16);
+        vertScrollBarChannels = channelScrollPane.getVerticalScrollBar();
+        vertScrollBarChannels.setUnitIncrement(16);
     }
 
     /**
@@ -45,8 +70,10 @@ public class UIChannelList extends JPanel {
      * @param channels the channels to add
      */
     public void addPrivateChannels(List<PrivateChannel> channels) {
-        for (UIChannelListItem item : UIChannelListItem.loadPrivateChannels(channels))
-            channelList.add(item,c,0);
+        List<UIChannelListItem> uiChannels = UIChannelListItem.loadPrivateChannels(channels);
+        Collections.sort(uiChannels);
+        for (UIChannelListItem item : uiChannels)
+            channelList.add(item,c,channelList.getComponentCount());
     }
 
     /**
@@ -54,8 +81,10 @@ public class UIChannelList extends JPanel {
      * @param guilds the guilds to add
      */
     public void addGuilds(List<Guild> guilds) {
-        for (UIChannelListItem item : UIChannelListItem.loadGuilds(guilds))
-            channelList.add(item,c,0);
+        for (UIChannelListItem item : UIChannelListItem.loadGuilds(guilds)) {
+            if (tabbed) guildList.add(item, c, 0);
+            else channelList.add(item,c,0);
+        }
     }
 
     /**
@@ -74,6 +103,14 @@ public class UIChannelList extends JPanel {
     public void addGroups(List<Group> groups) {
         for (UIChannelListItem item : UIChannelListItem.loadGroups(groups))
             channelList.add(item,c,0);
+    }
+
+    public void addGroupsAndPrivateChannels(List<Group> groups, List<PrivateChannel> channels) {
+        List<UIChannelListItem> uiItems = UIChannelListItem.loadGroups(groups);
+        uiItems.addAll(UIChannelListItem.loadPrivateChannels(channels));
+        Collections.sort(uiItems);
+        for (UIChannelListItem item : uiItems)
+            channelList.add(item,c,channelList.getComponentCount());
     }
 
     /**
@@ -98,8 +135,8 @@ public class UIChannelList extends JPanel {
     protected void refresh() {
         channelList.repaint();
         channelList.revalidate();
-        scrollPane.repaint();
-        scrollPane.revalidate();
+        channelScrollPane.repaint();
+        channelScrollPane.revalidate();
         repaint();
         revalidate();
     }

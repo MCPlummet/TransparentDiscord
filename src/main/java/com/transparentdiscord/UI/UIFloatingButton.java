@@ -84,10 +84,22 @@ public class UIFloatingButton extends JPanel {
         image.setSize(50,50);
         add(image);
 
+        JPopupMenu menu = new JPopupMenu();
+        JLabel close = new JLabel("Close");
+        close.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent mouseEvent) {
+                Main.closeChat(channel);
+                menu.setVisible(false);
+            }
+        });
+        menu.add(close);
+
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.openChat(channel);
+                if (mouseEvent.getButton() == 1)Main.openChat(channel);
+                else if (mouseEvent.getButton() == 3) menu.show(mouseEvent.getComponent(),0,0);
             }
         });
 

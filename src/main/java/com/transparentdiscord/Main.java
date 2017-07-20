@@ -46,6 +46,7 @@ public class Main {
 
     public static HashMap<String, UIChat> chatWindows;      //Maps the ID of a MessageChannel (String) to the UI associated with that channel (UIChat)
     private static HashMap<String, ImageIcon> chatIcons;    //Maps the ID of a chat, guild, or user icon to the icon
+    private static HashMap<String, UIFloatingButton> bubbles;//Maps the ID of a chat to a bubble, so that it can be removed from the list later
 
     public static JFrame channelWindow;                     //The JFrame responsible for displaying a UIChannelList
     public static JFrame chatWindow;                        //The JFrame responsible for displaying the active UIChat
@@ -61,7 +62,10 @@ public class Main {
     private static JDA jda;                                 //The object used to interface with Discord
 
     public static Font defaultFont;                         //The font to use for TransparentDiscord
+    public static Font boldFont;                            //The font to use for bolded text
     private static final String FONT_PATH = "/fonts/roboto/Roboto-Medium.ttf"; //The path to the font
+    private static final String BOLD_FONT_PATH = "/fonts/roboto/Roboto-Bold.ttf";//The path to the bold font
+
 
     public static void main(String[] args) {
         File tokenFile = new File("token");
@@ -140,6 +144,7 @@ public class Main {
     private static void init(String token) throws LoginException, InterruptedException, RateLimitedException, IOException {
         chatWindows     = new HashMap<>();
         chatIcons       = new HashMap<>();
+        bubbles         = new HashMap<>();
 
         jda = new JDABuilder(AccountType.CLIENT)    //Initialize the API
                 .setToken(token)                        //Log in with the token specified on stdin
@@ -153,7 +158,10 @@ public class Main {
         try {
             InputStream stream = Main.class.getResourceAsStream(FONT_PATH);
             defaultFont = Font.createFont(Font.TRUETYPE_FONT, stream);
-
+            stream.close();
+            stream = Main.class.getResourceAsStream(BOLD_FONT_PATH);
+            boldFont = Font.createFont(Font.TRUETYPE_FONT, stream);
+            stream.close();
         } catch (Exception e) {
             out.println("failed to load font, using builtin");
             defaultFont = new Font("Helvetica", Font.PLAIN, 12);
@@ -194,10 +202,9 @@ public class Main {
         bubbleWindow.pack();
         bubbleWindow.setVisible(true);
 
-        channelList = new UIChannelList();
+        channelList = new UIChannelList(true);
         channelList.addGuilds(guilds);
-        channelList.addGroups(groups);
-        channelList.addPrivateChannels(privateChannels);
+        channelList.addGroupsAndPrivateChannels(groups, privateChannels);
         channelWindow.add(channelList, BorderLayout.CENTER);  //Add a channel list, currently only containing private channels, the the channel window
 
         channelWindow.add(new UIStatusBar(getImage(jda.getSelfUser())), BorderLayout.SOUTH);
@@ -290,26 +297,52 @@ public class Main {
         }
     }
 
+    public static void closeChat(MessageChannel channel) {
+        if (chatWindows.containsKey(channel.getId()) &&
+                chatWindow.getContentPane().equals(chatWindows.get(channel.getId())) &&
+                chatWindow.isVisible()) chatWindow.setVisible(false);   //Minimize the chat window if it's open
+        if (chatWindows.containsKey(channel.getId())) {
+            chatWindow.remove(chatWindows.get(channel.getId()));
+            chatWindows.remove(channel.getId());
+            removeBubble(channel);
+        }
+    }
+
     /**
      * Adds a bubble to the bubble list for a given channel
      * Clicking the button will open the given channel inside a UIChat inside chatWindow
      * @param channel the channel to add a bubble for
      */
     public static void addBubble(MessageChannel channel) {
-        bubblePane.add(new UIFloatingButton(channel), gbc, 0);
+        UIFloatingButton button = new UIFloatingButton(channel);
+        bubbles.put(channel.getId(), button);
+        bubblePane.add(button, gbc, 0);
+
         resizeBubbles();
-        repositionWindows();
+    }
+
+    public static void removeBubble(MessageChannel channel) {
+        if (bubbles.containsKey(channel.getId())) {
+            bubblePane.remove(bubbles.get(channel.getId()));
+            bubbles.remove(channel.getId());
+        }
+
+        resizeBubbles();
     }
 
     /**
      * Resizes the bubble window to appropriately fit the current number of bubbles
      */
     private static void resizeBubbles() {
-        //TODO switch to more specific, less esoteric math (use variables to set bubble size, etc.)
-        bubbleWindow.setLocation(bubbleWindow.getX(), bubbleWindow.getY() - 50);    //Move the bubbles down 50 pixels (the size of a bubble)
-        bubbleWindow.setSize(50,bubblePane.getComponentCount()*65);                 //Increase the size of the bubble container
+        int tmp = bubbleWindow.getHeight();
+        bubbleWindow.pack();
+
+        bubbleWindow.setLocation(bubbleWindow.getX(), bubbleWindow.getY() + (tmp-bubbleWindow.getHeight()));    //Move the bubbles down by however much the height increased
+
         bubbleWindow.revalidate();
         bubbleWindow.repaint();
+
+        repositionWindows();
     }
 
     /**

@@ -24,7 +24,7 @@ public class UITitleBar extends JPanel {
         setLayout(new BorderLayout());
 
         JLabel title = new JLabel(titleText);
-        title.setFont(Main.defaultFont.deriveFont(Font.BOLD, 16));
+        title.setFont(Main.boldFont.deriveFont(Font.PLAIN, 16));
         title.setBorder(new EmptyBorder(20,20,20,20));
         add(title, BorderLayout.WEST);
 
@@ -49,6 +49,7 @@ public class UITitleBar extends JPanel {
         setLayout(new BorderLayout());
 
         JLabel title = new JLabel("Transparent Discord");
+        title.setFont(Main.boldFont.deriveFont(Font.PLAIN, 16));
         title.setBorder(new EmptyBorder(20,20,20,20));
         add(title, BorderLayout.WEST);
 

@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.core.OnlineStatus;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class UIStatusBar extends JPanel {
 
         setBackground(Color.decode("#99AAB5"));
 
-        icon = new JLabel(Main.resizeToWidth(image,25));
+        icon = new JLabel(TransparentDiscord.resizeToWidth(image,25));
 
         //Create a list of valid statuses; the user should not set their status to offline or unknown
         OnlineStatus[] validStatuses = {OnlineStatus.ONLINE, OnlineStatus.IDLE, OnlineStatus.DO_NOT_DISTURB, OnlineStatus.INVISIBLE};
@@ -45,14 +45,14 @@ public class UIStatusBar extends JPanel {
         status.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Main.setStatus(status.getItemAt(status.getSelectedIndex()));
+                TransparentDiscord.setStatus(status.getItemAt(status.getSelectedIndex()));
             }
         });
 
         newChat.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.friendWindow.setVisible(true);
+                TransparentDiscord.friendWindow.setVisible(true);
             }
         });
 

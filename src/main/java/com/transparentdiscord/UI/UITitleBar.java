@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -24,7 +24,7 @@ public class UITitleBar extends JPanel {
         setLayout(new BorderLayout());
 
         JLabel title = new JLabel(titleText);
-        title.setFont(Main.boldFont.deriveFont(Font.PLAIN, 16));
+        title.setFont(TransparentDiscord.boldFont.deriveFont(Font.PLAIN, 16));
         title.setBorder(new EmptyBorder(20,20,20,20));
         add(title, BorderLayout.WEST);
 
@@ -49,7 +49,7 @@ public class UITitleBar extends JPanel {
         setLayout(new BorderLayout());
 
         JLabel title = new JLabel("Transparent Discord");
-        title.setFont(Main.boldFont.deriveFont(Font.PLAIN, 16));
+        title.setFont(TransparentDiscord.boldFont.deriveFont(Font.PLAIN, 16));
         title.setBorder(new EmptyBorder(20,20,20,20));
         add(title, BorderLayout.WEST);
 
@@ -57,7 +57,7 @@ public class UITitleBar extends JPanel {
         closeButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.bubbleWindow.dispose();
+                TransparentDiscord.bubbleWindow.dispose();
                 System.exit(0);
             }
         });

@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.core.entities.Message;
 
 import javax.swing.*;
@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.lang.System.out;
 
 /**
  * Created by liam on 6/23/17.
@@ -46,12 +44,12 @@ public class UIMessage extends JPanel {
             if (a.isImage()) {
                 try {
                     //Get the image from the URL and resize it to the width of the chat window
-                    ImageIcon image = Main.getImageFromURL(new URL(a.getUrl()));
+                    ImageIcon image = TransparentDiscord.getImageFromURL(new URL(a.getUrl()));
 
                     //If the image is animated, we can't use smooth scaling
-                    if (a.getUrl().contains(".gif")) image = Main.resizeToWidthAnimated(image, Main.getChatWidth()-30);
-                    else image = Main.resizeToWidth(image, Main.getChatWidth()-30);
-                    
+                    if (a.getUrl().contains(".gif")) image = TransparentDiscord.resizeToWidthAnimated(image, TransparentDiscord.getChatWidth()-30);
+                    else image = TransparentDiscord.resizeToWidth(image, TransparentDiscord.getChatWidth()-30);
+
                     JLabel label = new JLabel(image);
                     image.setImageObserver(this);
                     attachments.add(label);
@@ -71,11 +69,11 @@ public class UIMessage extends JPanel {
             }
         }
 
-        authorIcon = new JLabel(Main.getImage(message.getAuthor(),25,25));
+        authorIcon = new JLabel(TransparentDiscord.getImage(message.getAuthor(),25,25));
         authorIcon.setBorder(new EmptyBorder(10,10,10,10));             //Add a buffer around the authorIcon name
         authorName = new JLabel(message.getAuthor().getName());
         messageText = new JTextArea(message.getContent());
-        messageText.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 12));
+        messageText.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 12));
         messageText.setLineWrap(true);
         messageText.setWrapStyleWord(true);
         messageText.setOpaque(false);

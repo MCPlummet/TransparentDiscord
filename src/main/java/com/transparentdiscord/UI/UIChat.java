@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -62,7 +62,7 @@ public abstract class UIChat extends JPanel {
         messageCompose = new JPanel(new BorderLayout());
 
         messageField = new JTextField();
-        messageField.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 12));
+        messageField.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 12));
         messageField.addActionListener(actionEvent -> { //Send a message and clear the field's text when the user presses 'enter'
             sendMessage(messageField.getText());
             messageField.setText("");
@@ -75,7 +75,7 @@ public abstract class UIChat extends JPanel {
             public void keyPressed(KeyEvent keyEvent) { //Close the chat window if the user presses escape
                 channel.sendTyping().queue();
                 if (keyEvent.getKeyCode() == KeyEvent.VK_ESCAPE)
-                    Main.chatWindow.setVisible(false);
+                    TransparentDiscord.chatWindow.setVisible(false);
                 if (keyEvent.isControlDown() && keyEvent.getKeyCode() == KeyEvent.VK_V) {
                     String mimetype = clipboard.getAvailableDataFlavors()[0].getMimeType();
                     try {
@@ -167,7 +167,7 @@ public abstract class UIChat extends JPanel {
     }
 
     private void addAttachmentPreview(Image image) {
-        ImageIcon preview = Main.resizeToWidth(new ImageIcon(image),Main.getChatWidth()-10);
+        ImageIcon preview = TransparentDiscord.resizeToWidth(new ImageIcon(image), TransparentDiscord.getChatWidth()-10);
         JLabel previewLabel = new JLabel(preview);
         previewLabel.setBorder(new EmptyBorder(5,5,5,5));
         previewLabel.addMouseListener(new MouseAdapter() {

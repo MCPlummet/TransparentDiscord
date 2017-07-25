@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -8,10 +8,7 @@ import net.dv8tion.jda.core.entities.User;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.net.URL;
 import javax.swing.*;
-
-import static java.lang.System.out;
 
 /**
  * Created by liam on 6/22/17.
@@ -33,13 +30,13 @@ public class UIFloatingButton extends JPanel {
         setBackground(new Color(0,0,0,0));  //Make it so only the bubble is visible
 
 //        setLayout(new BorderLayout());
-        JLabel title = new JLabel(Main.getScaledImageFromFile(getClass().getResource("/images/Discordbubble256.png"),50,50));
+        JLabel title = new JLabel(TransparentDiscord.getScaledImageFromFile(getClass().getResource("/images/Discordbubble256.png"),50,50));
         title.setForeground(Color.black);
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) { //show and hide the child when clicked
-                Main.chatWindow.setVisible(false);
+                TransparentDiscord.chatWindow.setVisible(false);
                 if (!child.isVisible()) {
                     child.setVisible(true);
                     child.revalidate();
@@ -65,7 +62,7 @@ public class UIFloatingButton extends JPanel {
                 int dY = currentY + mouseEvent.getY() - (currentY + initialClick.y);
 
                 parent.setLocation(currentX + dX, currentY + dY);
-                Main.repositionWindows();
+                TransparentDiscord.repositionWindows();
             }
         });
 
@@ -81,7 +78,7 @@ public class UIFloatingButton extends JPanel {
     public UIFloatingButton(MessageChannel channel) {
         setBackground(new Color(0,0,0,0));
 
-        Image i = Main.getImage(channel).getImage();
+        Image i = TransparentDiscord.getImage(channel).getImage();
         i = i.getScaledInstance(50,50,Image.SCALE_SMOOTH);
         JLabel image = new JLabel(new ImageIcon(i));
         image.setSize(50,50);
@@ -92,7 +89,7 @@ public class UIFloatingButton extends JPanel {
         close.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.closeChat(channel);
+                TransparentDiscord.closeChat(channel);
                 menu.setVisible(false);
             }
         });
@@ -101,7 +98,7 @@ public class UIFloatingButton extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == 1)Main.openChat(channel);
+                if (mouseEvent.getButton() == 1) TransparentDiscord.openChat(channel);
                 else if (mouseEvent.getButton() == 3) menu.show(mouseEvent.getComponent(),0,0);
             }
         });

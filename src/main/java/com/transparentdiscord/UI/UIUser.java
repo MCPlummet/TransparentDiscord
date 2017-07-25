@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.client.entities.Friend;
 import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.entities.User;
@@ -46,10 +46,10 @@ public class UIUser extends JPanel {
         this.user = user;
 
         displayName = new JLabel(user.getName());
-        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
+        displayName.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
-        icon = new JLabel(Main.resizeToWidth(Main.getImage(user),ICON_WIDTH));
+        icon = new JLabel(TransparentDiscord.resizeToWidth(TransparentDiscord.getImage(user),ICON_WIDTH));
 
         add(displayName, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
@@ -59,13 +59,13 @@ public class UIUser extends JPanel {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (user.hasPrivateChannel()) {
-                    Main.openChat(user.getPrivateChannel());
+                    TransparentDiscord.openChat(user.getPrivateChannel());
                 } else {
                     user.openPrivateChannel().queue(new Consumer<PrivateChannel>() {
                         @Override
                         public void accept(PrivateChannel privateChannel) {
-                            Main.openChat(privateChannel);
-                            Main.channelList.addPrivateChannel(privateChannel);
+                            TransparentDiscord.openChat(privateChannel);
+                            TransparentDiscord.channelList.addPrivateChannel(privateChannel);
                         }
                     });
                 }

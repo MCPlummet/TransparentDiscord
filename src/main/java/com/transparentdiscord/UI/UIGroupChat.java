@@ -1,10 +1,9 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
-import net.dv8tion.jda.core.entities.PrivateChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.awt.*;
@@ -53,7 +52,7 @@ public class UIGroupChat extends UIChat {
             name.append(group.getName());
         }
 
-        add(new UITitleBar(name.toString(), Main.chatWindow), BorderLayout.NORTH);
+        add(new UITitleBar(name.toString(), TransparentDiscord.chatWindow), BorderLayout.NORTH);
 
 
     }

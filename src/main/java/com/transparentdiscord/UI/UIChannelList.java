@@ -150,7 +150,7 @@ public class UIChannelList extends JPanel {
     }
 
     public void update(Message message) {
-        if (message.getChannel() instanceof Guild) {
+        if (!(message.getChannel() instanceof Guild)) {
             UIChannelListItem item = channelItems.get(message.getChannel().getId());
             channelList.remove(item);
             channelList.add(item,c,0);

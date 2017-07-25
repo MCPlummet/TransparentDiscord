@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -44,7 +44,7 @@ public class UITextChat extends UIChat {
 
         add(new UITitleBar("<html>" +
                 textChannel.getGuild().getName() + "<br>#" +
-                channel.getName() + "</html>", Main.chatWindow), BorderLayout.NORTH);
+                channel.getName() + "</html>", TransparentDiscord.chatWindow), BorderLayout.NORTH);
 
     }
 

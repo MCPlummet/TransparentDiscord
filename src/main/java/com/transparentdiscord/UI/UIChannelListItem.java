@@ -1,6 +1,6 @@
 package com.transparentdiscord.UI;
 
-import com.transparentdiscord.Main;
+import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.*;
 
@@ -70,11 +70,11 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
 
         displayName = new JLabel(channel.getName());
         displayName.setBorder(new EmptyBorder(5,0,0,0));
-        displayName.setFont(Main.boldFont.deriveFont(Font.PLAIN, 12));
+        displayName.setFont(TransparentDiscord.boldFont.deriveFont(Font.PLAIN, 12));
 
         try {
             messagePreview = new JLabel();
-            messagePreview.setFont(Main.defaultFont.deriveFont(Font.PLAIN,12));
+            messagePreview.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN,12));
             Message m = channel.getHistory().retrievePast(1).complete().get(0);
             messagePreview.setText(m.getAuthor().getName() +": " + m.getContent());
             time = m.getCreationTime();
@@ -83,7 +83,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
             out.println("Channel " + channel.getName() + " does not have any messages");
         }
 
-        icon = new JLabel(Main.resizeToWidth(Main.getImage(channel),ICON_WIDTH));
+        icon = new JLabel(TransparentDiscord.resizeToWidth(TransparentDiscord.getImage(channel),ICON_WIDTH));
         icon.setBorder(new EmptyBorder(5,5,5,5));
 
         content.add(displayName, BorderLayout.NORTH);
@@ -94,7 +94,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.openChat(channel);
+                TransparentDiscord.openChat(channel);
             }
         });
     }
@@ -107,10 +107,10 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         this(guild.getId());
 
         displayName = new JLabel(guild.getName());
-        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
+        displayName.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
-        icon = new JLabel(Main.resizeToWidth(Main.getImage(guild),ICON_WIDTH));
+        icon = new JLabel(TransparentDiscord.resizeToWidth(TransparentDiscord.getImage(guild),ICON_WIDTH));
 
         add(displayName, BorderLayout.CENTER);
         add(icon, BorderLayout.WEST);
@@ -138,7 +138,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         this(channel.getId());
 
         displayName = new JLabel(channel.getName());
-        displayName.setFont(Main.defaultFont.deriveFont(Font.PLAIN, 16));
+        displayName.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 16));
         displayName.setBorder(new EmptyBorder(10,10,10,10));
 
         add(displayName, BorderLayout.CENTER);
@@ -147,7 +147,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.openChat(channel);
+                TransparentDiscord.openChat(channel);
             }
         });
     }
@@ -170,11 +170,11 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         }
         displayName = new JLabel(name.toString());
         displayName.setBorder(new EmptyBorder(5,0,0,0));
-        displayName.setFont(Main.boldFont.deriveFont(Font.PLAIN, 12));
+        displayName.setFont(TransparentDiscord.boldFont.deriveFont(Font.PLAIN, 12));
 
         try {
             messagePreview = new JLabel();
-            messagePreview.setFont(Main.defaultFont.deriveFont(Font.PLAIN,12));
+            messagePreview.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN,12));
             Message m = group.getHistory().retrievePast(1).complete().get(0);
             messagePreview.setText(m.getAuthor().getName() +": " + m.getContent());
             time = m.getCreationTime();
@@ -183,7 +183,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
             out.println("Channel " + group.getName() + " does not have any messages");
         }
 
-        icon = new JLabel(Main.resizeToWidth(Main.getImage(group),ICON_WIDTH));
+        icon = new JLabel(TransparentDiscord.resizeToWidth(TransparentDiscord.getImage(group),ICON_WIDTH));
         icon.setBorder(new EmptyBorder(5,5,5,5));
 
         content.add(displayName, BorderLayout.NORTH);
@@ -193,7 +193,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                Main.openChat(group);
+                TransparentDiscord.openChat(group);
             }
         });
     }
@@ -214,6 +214,7 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
             messagePreview.setText(message.getAuthor().getName() +": " + message.getContent());
         }
         time = message.getCreationTime();
+        out.println("updating channel list item");
         revalidate();
         repaint();
     }

@@ -247,8 +247,11 @@ public class TransparentDiscord {
         int bubbleX = bubbleWindow.getX();
         int bubbleY = bubbleWindow.getY();
 
-        chatWindow.setLocation(bubbleX-405,bubbleY-(700-bubbleWindow.getHeight()));
-        channelWindow.setLocation(bubbleX-405,bubbleY-(700-bubbleWindow.getHeight()));
+
+        int height = (bubbles.keySet().size()+1)*UIFloatingButton.BUBBLE_SIZE;
+
+        chatWindow.setLocation(bubbleX-405,bubbleY-(700-height));
+        channelWindow.setLocation(bubbleX-405,bubbleY-(700-height));
     }
 
     /**
@@ -265,6 +268,17 @@ public class TransparentDiscord {
             chatWindow.setVisible(false);   //Minimize the chat window
             return;                         //No need to continue
         }
+
+        UIChat chat = getChat(channel);             //Get the UIChat element from the MessageChannel
+        if (!bubbles.containsKey(channel.getId())) addBubble(channel);
+        chatWindow.setContentPane(chat);            //Update the current chat UI
+        chatWindow.setVisible(true);                //Make sure chatWindow is displayed
+        chatWindow.revalidate();                    //Refresh the chat window
+        chatWindow.repaint();                       //..
+        channelWindow.setVisible(false);            //Hide the channel list
+    }
+
+    private static UIChat getChat(MessageChannel channel) {
         if (channel instanceof PrivateChannel) {                        //If the channel is a private channel...
             UIPrivateChat pc;
             if (chatWindows.containsKey(channel.getId()))               //If the channel has already been opened...
@@ -272,13 +286,8 @@ public class TransparentDiscord {
             else {
                 pc = new UIPrivateChat((PrivateChannel) channel);       //Otherwise, create a new UIChat
                 chatWindows.put(channel.getId(), pc);                   //Put it in chatWindows
-                addBubble(pc.getChannel());//And add a bubble for it
             }
-            chatWindow.setContentPane(pc);              //Update the current chat UI
-            chatWindow.setVisible(true);                //Make sure chatWindow is displayed
-            chatWindow.revalidate();                    //Refresh the chat window
-            chatWindow.repaint();                       //..
-            channelWindow.setVisible(false);            //Hide the channel list
+            return pc;
         } else if (channel instanceof TextChannel) {
             UITextChat tc;
             TextChannel textChannel = (TextChannel) channel;
@@ -287,14 +296,9 @@ public class TransparentDiscord {
             else {
                 tc = new UITextChat((TextChannel) channel);
                 chatWindows.put(channel.getId(), tc);
-                addBubble(tc.getChannel());
             }
 
-            chatWindow.setContentPane(tc);              //Update the current chat UI
-            chatWindow.setVisible(true);                //Make sure chatWindow is displayed
-            chatWindow.revalidate();                    //Refresh the chat window
-            chatWindow.repaint();                       //..
-            channelWindow.setVisible(false);            //Hide the channel list
+            return tc;
         } else if (channel instanceof Group) {
             UIGroupChat gc;
             Group group = (Group) channel;
@@ -303,14 +307,11 @@ public class TransparentDiscord {
             else {
                 gc = new UIGroupChat(group);
                 chatWindows.put(channel.getId(), gc);
-                addBubble(gc.getChannel());
             }
 
-            chatWindow.setContentPane(gc);              //Update the current chat UI
-            chatWindow.setVisible(true);                //Make sure chatWindow is displayed
-            chatWindow.revalidate();                    //Refresh the chat window
-            chatWindow.repaint();                       //..
-            channelWindow.setVisible(false);            //Hide the channel list
+            return gc;
+        } else {
+            return null;
         }
     }
 
@@ -335,6 +336,18 @@ public class TransparentDiscord {
                 notificationSound.setFramePosition(0);
                 notificationSound.start();
             }
+            if (bubbles.containsKey(channel.getId()) && message.getAuthor().getName() != jda.getSelfUser().getName() &&
+                    !(chatWindow.getContentPane().equals(chatWindows.get(channel.getId())) && chatWindow.isVisible())) {
+                bubbles.get(channel.getId()).updateUnread();
+            }
+        } else if (!(channel instanceof TextChannel)) {
+            UIChat chat = getChat(channel);
+            addBubble(channel);
+            chatWindows.put(channel.getId(), chat);
+            bubbles.get(channel.getId()).updateUnread();
+            notificationSound.stop();
+            notificationSound.setFramePosition(0);
+            notificationSound.start();
         }
         channelList.revalidate();
         channelList.repaint();

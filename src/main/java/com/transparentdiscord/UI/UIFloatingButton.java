@@ -17,6 +17,9 @@ import javax.swing.*;
 public class UIFloatingButton extends JPanel {
 
     private Point initialClick;     //Keeps track of the mouse position for use in window dragging
+    private int unread = 0;
+
+    public static final int BUBBLE_SIZE = 60;
 
 
     /**
@@ -98,7 +101,12 @@ public class UIFloatingButton extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == 1) TransparentDiscord.openChat(channel);
+                if (mouseEvent.getButton() == 1) {
+                    TransparentDiscord.openChat(channel);
+                    unread = 0;
+                    revalidate();
+                    repaint();
+                }
                 else if (mouseEvent.getButton() == 3) menu.show(mouseEvent.getComponent(),0,0);
             }
         });
@@ -125,5 +133,24 @@ public class UIFloatingButton extends JPanel {
             setToolTipText(channel.getName());  //Set the hover text to the name of the channel
         }
         setCursor(new Cursor(Cursor.HAND_CURSOR));  //Indicate to the user that this element is clickable
+    }
+
+    public void updateUnread() {
+        unread++;
+        revalidate();
+        repaint();
+    }
+
+    @Override
+    public void paintChildren(Graphics g) {
+        g.clearRect(0,0,getWidth(),getHeight());
+        super.paintChildren(g);
+        if (unread > 0) {
+            g.setColor(Color.RED);
+            g.fillOval(45,5,15,15);
+            g.setColor(Color.BLACK);
+            g.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 12));
+            g.drawString("" + ((unread > 9) ? "!" : unread) ,50,18);
+        }
     }
 }

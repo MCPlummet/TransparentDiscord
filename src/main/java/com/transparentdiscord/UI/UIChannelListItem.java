@@ -172,9 +172,10 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         displayName.setBorder(new EmptyBorder(5,0,0,0));
         displayName.setFont(TransparentDiscord.boldFont.deriveFont(Font.PLAIN, 12));
 
+        messagePreview = new JLabel();
+        messagePreview.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN,12));
+
         try {
-            messagePreview = new JLabel();
-            messagePreview.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN,12));
             Message m = group.getHistory().retrievePast(1).complete().get(0);
             messagePreview.setText(m.getAuthor().getName() +": " + m.getContent());
             time = m.getCreationTime();
@@ -214,7 +215,6 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
             messagePreview.setText(message.getAuthor().getName() +": " + message.getContent());
         }
         time = message.getCreationTime();
-        out.println("updating channel list item");
         revalidate();
         repaint();
     }

@@ -56,6 +56,8 @@ public class UIChannelList extends JPanel {
             vertScrollBarGuilds = guildScrollPane.getVerticalScrollBar();
             vertScrollBarGuilds.setUnitIncrement(16);
 
+            setBackground(Color.decode("#7289DA"));
+
             add(tabPane);
         } else {
             add(channelScrollPane);
@@ -150,7 +152,7 @@ public class UIChannelList extends JPanel {
     }
 
     public void update(Message message) {
-        if (!(message.getChannel() instanceof Guild)) {
+        if (!(message.getChannel() instanceof TextChannel)) {
             UIChannelListItem item = channelItems.get(message.getChannel().getId());
             channelList.remove(item);
             channelList.add(item,c,0);

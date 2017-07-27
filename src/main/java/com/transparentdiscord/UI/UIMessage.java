@@ -9,6 +9,7 @@ import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -58,13 +59,19 @@ public class UIMessage extends JPanel {
                 }
             }
             else {
-                JLabel label = new JLabel(a.getFileName());
+                JLabel label = new JLabel(a.getFileName(),
+                        TransparentDiscord.resizeToWidth(TransparentDiscord.getDownloadIcon(),25), JLabel.LEFT);
                 label.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        //TODO add file download prompt
+                        JFileChooser chooser = new JFileChooser();
+                        chooser.setSelectedFile(new File(System.getProperty("user.home") +"/" + a.getFileName()));
+                        int response = chooser.showSaveDialog(null);
+                        if (response == JFileChooser.APPROVE_OPTION)
+                            a.download(chooser.getSelectedFile());
                     }
                 });
+                label.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 attachments.add(label);
             }
         }
@@ -84,11 +91,12 @@ public class UIMessage extends JPanel {
 
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));             //Add a line at the bottom of the message
 
-        add(attachments, BorderLayout.NORTH);
         add(authorIcon, BorderLayout.WEST);
         add(authorName, BorderLayout.SOUTH);
-        add(messageText, BorderLayout.CENTER);
         add(timestamp, BorderLayout.EAST);
+
+        add(messageText, BorderLayout.CENTER);
+        add(attachments, BorderLayout.NORTH);
     }
 
     /**

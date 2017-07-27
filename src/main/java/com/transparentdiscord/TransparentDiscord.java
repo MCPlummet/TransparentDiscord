@@ -58,6 +58,12 @@ public class TransparentDiscord {
     private static GridBagConstraints gbc;                  //Constraints for adding bubbles to bubblePane
 
     private static ImageIcon defaultUserIcon;               //The default user icon (Discord logo with yellow background)
+    private static ImageIcon defaultGroupIcon;              //The default icon for groups
+    private static ImageIcon downloadIcon;                  //The default attachment icon
+
+    private static final String GROUP_ICON_PATH = "/images/group.png"; //The path to the default group icon
+    private static final String DOWNLOAD_ICON_PATH = "/images/download.png"; //The path to the download icon
+
     private static JDA jda;                                 //The object used to interface with Discord
 
     public static Font defaultFont;                         //The font to use for TransparentDiscord
@@ -169,6 +175,9 @@ public class TransparentDiscord {
             notificationSound = AudioSystem.getClip();
             AudioInputStream inputStream = AudioSystem.getAudioInputStream(TransparentDiscord.class.getResource(SOUND_PATH));
             notificationSound.open(inputStream);
+
+            defaultGroupIcon = getImageFromFile(TransparentDiscord.class.getResource(GROUP_ICON_PATH));
+            downloadIcon = getImageFromFile(TransparentDiscord.class.getResource(DOWNLOAD_ICON_PATH));
 
         } catch (LineUnavailableException e) {
             out.println("failed to load font, using builtin");
@@ -294,7 +303,7 @@ public class TransparentDiscord {
             if (chatWindows.containsKey(channel.getId()))
                 tc = (UITextChat) chatWindows.get(channel.getId());
             else {
-                tc = new UITextChat((TextChannel) channel);
+                tc = new UITextChat(textChannel);
                 chatWindows.put(channel.getId(), tc);
             }
 
@@ -444,9 +453,9 @@ public class TransparentDiscord {
                 chatIcons.put(group.getIconId(), image);
                 return image;
             } catch (MalformedURLException e) {
-                return defaultUserIcon;
+                return defaultGroupIcon;
             } catch (IOException e) {
-                return defaultUserIcon;
+                return defaultGroupIcon;
             }
         }
     }
@@ -550,6 +559,8 @@ public class TransparentDiscord {
         int height = (int) (ratio * width);
         return new ImageIcon(image.getImage().getScaledInstance(width,height,Image.SCALE_DEFAULT));
     }
+
+    public static ImageIcon getDownloadIcon() { return downloadIcon; }
 
     /**
      * Clips a buffered image to a circle as per https://stackoverflow.com/a/31424601

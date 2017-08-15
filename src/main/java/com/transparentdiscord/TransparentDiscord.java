@@ -13,6 +13,7 @@ import javax.imageio.ImageIO;
 import javax.security.auth.login.LoginException;
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -60,9 +61,11 @@ public class TransparentDiscord {
     private static ImageIcon defaultUserIcon;               //The default user icon (Discord logo with yellow background)
     private static ImageIcon defaultGroupIcon;              //The default icon for groups
     private static ImageIcon downloadIcon;                  //The default attachment icon
+    private static ImageIcon defaultGuildIcon;              //The default guild icon
 
     private static final String GROUP_ICON_PATH = "/images/group.png"; //The path to the default group icon
     private static final String DOWNLOAD_ICON_PATH = "/images/download.png"; //The path to the download icon
+    private static final String GUILD_ICON_PATH = "/images/guild.png"; //The path to the guild icon
 
     private static JDA jda;                                 //The object used to interface with Discord
 
@@ -74,9 +77,14 @@ public class TransparentDiscord {
     private static Clip notificationSound;                  //Stores the sound file used for notifications
     private static final String SOUND_PATH = "/sounds/notification.wav"; //Notification obtained from http://freesound.org/people/TheGertz/sounds/235911/
 
+    public static final int UI_WIDTH = 425;
+    private static final int UI_HEIGHT = 700;
+
 
     public static void main(String[] args) {
         System.setProperty("http.agent", "Mozilla/5.0 AppleWebKit/537.31 Chrome/26.0.1410.65 Safari/537.31");
+        configureUI();
+
         File tokenFile = new File("token");
         if (tokenFile.exists()) {           //Check if the token has been stored
             try {
@@ -89,6 +97,17 @@ public class TransparentDiscord {
         } else {
             displayLoginPrompt();   //Otherwise, display the login prompt
         }
+    }
+
+    private static void configureUI() {
+        UIManager.put("ScrollBarUI", "com.transparentdiscord.UI.Custom.CustomScrollBarUI");
+
+        UIManager.put("ScrollBar.width", 4);
+        UIManager.put("ScrollBar.track", new ColorUIResource(new Color(0,0,0,0)));
+        UIManager.put("ScrollBar.thumb", new ColorUIResource(Color.decode("#99AAB5")));
+        UIManager.put("ScrollBar.thumbDarkShadow", new ColorUIResource(Color.decode("#99AAB5")));
+        UIManager.put("ScrollBar.thumbShadow", new ColorUIResource(Color.decode("#99AAB5")));
+        UIManager.put("ScrollBar.thumbHighlight", new ColorUIResource(Color.decode("#99AAB5")));
     }
 
     /**
@@ -178,6 +197,7 @@ public class TransparentDiscord {
 
             defaultGroupIcon = getImageFromFile(TransparentDiscord.class.getResource(GROUP_ICON_PATH));
             downloadIcon = getImageFromFile(TransparentDiscord.class.getResource(DOWNLOAD_ICON_PATH));
+            defaultGuildIcon = getImageFromFile(TransparentDiscord.class.getResource(GUILD_ICON_PATH));
 
         } catch (LineUnavailableException e) {
             out.println("failed to load font, using builtin");
@@ -193,17 +213,31 @@ public class TransparentDiscord {
             System.exit(1);
         }
 
+        try {
+            notificationSound = AudioSystem.getClip();
+            AudioInputStream inputStream = AudioSystem.getAudioInputStream(TransparentDiscord.class.getResource(SOUND_PATH));
+            notificationSound.open(inputStream);
+        } catch (LineUnavailableException e) {
+            e.printStackTrace();
+        } catch (UnsupportedAudioFileException e) {
+            e.printStackTrace();
+        }
+
+        defaultGroupIcon = getImageFromFile(TransparentDiscord.class.getResource(GROUP_ICON_PATH));
+        downloadIcon = getImageFromFile(TransparentDiscord.class.getResource(DOWNLOAD_ICON_PATH));
+        defaultGuildIcon = getImageFromFile(TransparentDiscord.class.getResource(GUILD_ICON_PATH));
+
         defaultUserIcon = getCircularImageFromURL(new URL(jda.getSelfUser().getDefaultAvatarUrl()));
 
         channelWindow = new JFrame();
         channelWindow.setLayout(new BorderLayout());
         channelWindow.add(new UITitleBar(), BorderLayout.NORTH);
         channelWindow.setUndecorated(true);             //Remove the window border
-        channelWindow.setSize(400,700);
+        channelWindow.setSize(UI_WIDTH,UI_HEIGHT);
 
         chatWindow = new JFrame();
         chatWindow.setUndecorated(true);
-        chatWindow.setSize(400,700);
+        chatWindow.setSize(UI_WIDTH,UI_HEIGHT);
 
 
         bubbleWindow = new JFrame();
@@ -242,7 +276,7 @@ public class TransparentDiscord {
         UIUserList friendList = new UIUserList();
         friendList.addFriends(jda.asClient().getFriends());
         friendWindow.add(friendList);
-        friendWindow.setSize(400,700);
+        friendWindow.setSize(UI_WIDTH,UI_HEIGHT);
         friendWindow.setLocationRelativeTo(channelWindow);
         friendWindow.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 
@@ -259,8 +293,8 @@ public class TransparentDiscord {
 
         int height = (bubbles.keySet().size()+1)*UIFloatingButton.BUBBLE_SIZE;
 
-        chatWindow.setLocation(bubbleX-405,bubbleY-(700-height));
-        channelWindow.setLocation(bubbleX-405,bubbleY-(700-height));
+        chatWindow.setLocation(bubbleX-UI_WIDTH-5,bubbleY-(UI_HEIGHT-height));
+        channelWindow.setLocation(bubbleX-UI_WIDTH-5,bubbleY-(UI_HEIGHT-height));
     }
 
     /**
@@ -432,9 +466,9 @@ public class TransparentDiscord {
                 chatIcons.put(guild.getIconId(), image);
                 return image;
             } catch (MalformedURLException e) {
-                return defaultUserIcon;
+                return defaultGuildIcon;
             } catch (IOException e) {
-                return defaultUserIcon;
+                return defaultGuildIcon;
             }
         }
     }
@@ -616,5 +650,9 @@ public class TransparentDiscord {
      */
     public static void setStatus(OnlineStatus status) {
         jda.getPresence().setStatus(status);
+    }
+
+    public static boolean isSelfUser(User user) {
+        return user.getId().equals(jda.getSelfUser().getId());
     }
 }

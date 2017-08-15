@@ -1,5 +1,6 @@
 package com.transparentdiscord.UI;
 
+import com.transparentdiscord.UI.Custom.CustomScrollBarUI;
 import net.dv8tion.jda.client.entities.Group;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Message;
@@ -55,6 +56,7 @@ public class UIChannelList extends JPanel {
 
             vertScrollBarGuilds = guildScrollPane.getVerticalScrollBar();
             vertScrollBarGuilds.setUnitIncrement(16);
+            vertScrollBarGuilds.setUI(new CustomScrollBarUI());
 
             setBackground(Color.decode("#7289DA"));
 
@@ -71,6 +73,7 @@ public class UIChannelList extends JPanel {
         c.fill = GridBagConstraints.HORIZONTAL;
 
         vertScrollBarChannels = channelScrollPane.getVerticalScrollBar();
+        vertScrollBarChannels.setUI(new CustomScrollBarUI());
         vertScrollBarChannels.setUnitIncrement(16);
     }
 

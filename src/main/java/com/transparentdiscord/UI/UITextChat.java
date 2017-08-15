@@ -1,6 +1,8 @@
 package com.transparentdiscord.UI;
 
 import com.transparentdiscord.TransparentDiscord;
+import com.transparentdiscord.UI.Message.UIMessage;
+import com.transparentdiscord.UI.Message.UIMessageGroup;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageHistory;
 import net.dv8tion.jda.core.entities.TextChannel;
@@ -34,9 +36,20 @@ public class UITextChat extends UIChat {
         //Get some message history and add it to the message list
         //Message history in order from newest to oldest
         messageHistory.retrievePast(20).queue(messages -> {
-            for (UIMessage m : UIMessage.loadMessages(messages)) {
-                messageList.add(m, c, 0); //Add each message to the top of the list
+            newestGroup = oldestGroup = new UIMessageGroup(messages.get(0));
+            messageList.add(oldestGroup,c,0);
+
+            //Going from newest to oldest...
+            for (int i = 1; i < messages.size(); i++) {
+                if (oldestGroup.canAddMessage(messages.get(i))) {
+                    oldestGroup.addMessage(messages.get(i));
+                }
+                else {
+                    oldestGroup = new UIMessageGroup(messages.get(i));
+                    messageList.add(oldestGroup,c,0);
+                }
             }
+
             refresh();
             scrollToBottom();
             doneLoad = true;
@@ -50,7 +63,13 @@ public class UITextChat extends UIChat {
 
     @Override
     public void receiveMessage(Message message) {
-        messageList.add(new UIMessage(message), c, messageList.getComponentCount()); //Add the received message at the bottom of the message list
+        if (newestGroup.canAddMessage(message))
+            newestGroup.addMessage(message);
+        else {
+            newestGroup = new UIMessageGroup(message);
+            messageList.add(newestGroup, c, messageList.getComponentCount()); //Add the received message at the bottom of the message list
+        }
+
         refresh();
         scrollToBottom();
     }
@@ -58,8 +77,15 @@ public class UITextChat extends UIChat {
     @Override
     protected void loadMessageHistory() {
         messageHistory.retrievePast(10).queue(messages -> {
-            for (UIMessage m : UIMessage.loadMessages(messages)) {
-                messageList.add(m, c, 0); //Add each message to the top of the list
+            //Going from newest to oldest...
+            for (int i = 0; i < messages.size(); i++) {
+                if (oldestGroup.canAddMessage(messages.get(i))) {
+                    oldestGroup.addMessage(messages.get(i));
+                }
+                else {
+                    oldestGroup = new UIMessageGroup(messages.get(i));
+                    messageList.add(oldestGroup,c,0);
+                }
             }
             refresh();
         });

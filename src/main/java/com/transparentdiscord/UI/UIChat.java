@@ -1,6 +1,8 @@
 package com.transparentdiscord.UI;
 
 import com.transparentdiscord.TransparentDiscord;
+import com.transparentdiscord.UI.Custom.CustomScrollBarUI;
+import com.transparentdiscord.UI.Message.UIMessageGroup;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
@@ -37,6 +39,9 @@ public abstract class UIChat extends JPanel {
     protected File              fileAttachment; //A potential attachment, used for pasted files
     protected Image             attachmentPreview;//Stores a preview of the current attachment
 
+    protected UIMessageGroup newestGroup;
+    protected UIMessageGroup oldestGroup;
+
     private int                 tmpScrollValue; //Stores the previous maximum value before update of the vertical scroll bar
     private boolean             fixScroll;      //a boolean to keep track of the state of the scrollbar while loading older messages
     protected boolean           doneLoad;       //prevents the UI from loading older messages before the initial messages have loaded
@@ -57,7 +62,10 @@ public abstract class UIChat extends JPanel {
         scrollPane = new JScrollPane(messageList);
         add(scrollPane);
 
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
         vertScrollBar = scrollPane.getVerticalScrollBar();
+        vertScrollBar.setUI(new CustomScrollBarUI());
 
         messageCompose = new JPanel(new BorderLayout());
 
@@ -83,13 +91,13 @@ public abstract class UIChat extends JPanel {
                             String pastedText = (String) clipboard.getContents(null).getTransferData(DataFlavor.stringFlavor);
                             messageField.setText(messageField.getText() + pastedText);
                         }
-                        else if (mimetype.contains("text/uri-list")) {
+                        else if (mimetype.contains("text/uri-list") || mimetype.contains("application/x-java-file-list")) {
                             List<File> files = (List) clipboard.getContents(null).getTransferData(DataFlavor.javaFileListFlavor);
                             fileAttachment = files.get(0);
                             try {
                                 addAttachmentPreview(ImageIO.read(fileAttachment));
                             } catch (Exception e) {
-                                //TODO set preview to default file icon
+                                addAttachmentPreview(TransparentDiscord.getDownloadIcon().getImage());
                             }
                             attachment = null;
                         }
@@ -101,7 +109,15 @@ public abstract class UIChat extends JPanel {
                             fileAttachment = null;
                         }
                     } catch (UnsupportedFlavorException e) {
-                        out.println("Pasted data not supported...");
+                        String pastedText = null;
+                        try {
+                            pastedText = (String) clipboard.getContents(null).getTransferData(DataFlavor.stringFlavor);
+                        } catch (UnsupportedFlavorException e1) {
+                            out.println("Pasted data not supported.");
+                        } catch (IOException e1) {
+                            out.println("IO Failed...");
+                        }
+                        messageField.setText(messageField.getText() + pastedText);
                     } catch (IOException e) {
                         out.println("IO Failed...");
                     } catch (ClassNotFoundException e) {

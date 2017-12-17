@@ -3,7 +3,6 @@ package com.transparentdiscord.UI.Message;
 import com.transparentdiscord.TransparentDiscord;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
-import org.apache.commons.lang3.text.WordUtils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -59,7 +58,7 @@ public class UIMessageGroup extends JPanel {
 
         if (TransparentDiscord.isSelfUser(user)) {
             messagePanel.setBackground(Color.LIGHT_GRAY);
-            setBorder(new EmptyBorder(5,50,5,5));
+            setBorder(new EmptyBorder(15,50,15,5));
 
             messageInfo = new JLabel(getInfo());
             messageInfo.setFont(TransparentDiscord.defaultFont.deriveFont(Font.PLAIN, 12));
@@ -70,7 +69,7 @@ public class UIMessageGroup extends JPanel {
         }
         else {
             messagePanel.setBackground(Color.WHITE);
-            setBorder(new EmptyBorder(5,5,5,5));
+            setBorder(new EmptyBorder(15,5,15,5));
 
             authorIcon = new JLabel(TransparentDiscord.getImage(message.getAuthor(),25,25));
             authorIcon.setBorder(new EmptyBorder(10,10,10,10));
@@ -98,10 +97,10 @@ public class UIMessageGroup extends JPanel {
                 + ((localTime.getHour()>12) ? "PM" : "AM");
 
         String month = localTime.getMonth().name().substring(0,3).toLowerCase();
-        month = WordUtils.capitalize(month);
+//        month = WordUtils.capitalize(month);
 
         String day = localTime.getDayOfWeek().name().substring(0,3).toLowerCase();
-        day = WordUtils.capitalize(day);
+//        day = WordUtils.capitalize(day);
 
         String date = day + ", "
                 + month + " "

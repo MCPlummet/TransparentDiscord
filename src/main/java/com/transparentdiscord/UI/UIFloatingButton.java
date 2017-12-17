@@ -10,6 +10,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import static java.lang.System.out;
+
 /**
  * Created by liam on 6/22/17.
  * Represents the bubbles used to open different UI elements
@@ -47,17 +49,26 @@ public class UIFloatingButton extends JPanel {
                 }
                 else
                     child.setVisible(false);
-                parent.setBackground(new Color(0,0,0,0));
+
+
             }
             @Override
             public void mousePressed(MouseEvent mouseEvent) { //when pressed, record the location of the mouse
                 initialClick = mouseEvent.getPoint();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent mouseEvent) {
+                parent.setBackground(new Color(0,0,0,0));
             }
         });
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent mouseEvent) { //when dragged, move the parent by the amount dragged
+                if (!parent.getBackground().equals(Color.black))
+                    parent.setBackground(Color.black);
+
                 int currentX = parent.getLocation().x;
                 int currentY = parent.getLocation().y;
 

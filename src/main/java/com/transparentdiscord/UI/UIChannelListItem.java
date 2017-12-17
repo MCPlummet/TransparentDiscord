@@ -39,7 +39,6 @@ public class UIChannelListItem extends JPanel implements Comparable<UIChannelLis
         setBorder(new MatteBorder(0,0,1,0,Color.GRAY));
 
         content = new JPanel(new BorderLayout());
-
         this.id = id;
 
         MouseAdapter hoverChange = new MouseAdapter() {

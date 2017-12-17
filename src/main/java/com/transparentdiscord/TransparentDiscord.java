@@ -17,6 +17,8 @@ import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -101,6 +103,9 @@ public class TransparentDiscord {
 
     private static void configureUI() {
         UIManager.put("ScrollBarUI", "com.transparentdiscord.UI.Custom.CustomScrollBarUI");
+
+        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("swing.aatext", "true");
 
         UIManager.put("ScrollBar.width", 4);
         UIManager.put("ScrollBar.track", new ColorUIResource(new Color(0,0,0,0)));
@@ -483,7 +488,7 @@ public class TransparentDiscord {
             return chatIcons.get(group.getIconId());
         else {
             try {
-                ImageIcon image = getImageFromURL(new URL(group.getIconUrl()));
+                ImageIcon image = getCircularImageFromURL(new URL(group.getIconUrl()));
                 chatIcons.put(group.getIconId(), image);
                 return image;
             } catch (MalformedURLException e) {

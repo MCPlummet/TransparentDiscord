@@ -164,7 +164,7 @@ public abstract class UIChat extends JPanel {
         else if (fileAttachment != null) {
             try {
                 channel.sendFile(fileAttachment, builder.build()).queue();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 out.println("Failed to send file...");
             }
 

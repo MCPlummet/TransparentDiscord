@@ -59,7 +59,7 @@ public class UIUser extends JPanel {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
                 if (user.hasPrivateChannel()) {
-                    TransparentDiscord.openChat(user.getPrivateChannel());
+                    TransparentDiscord.openChat(user.openPrivateChannel().complete());
                 } else {
                     user.openPrivateChannel().queue(new Consumer<PrivateChannel>() {
                         @Override
